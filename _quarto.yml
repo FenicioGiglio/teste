@@ -1,0 +1,46 @@
+project:
+  type: book
+
+book:
+  title: "APRENDIZADO DE MÁQUINA COM R"
+  reader-mode: true
+  back-to-top-navigation: true
+  search: true
+  repo-actions: [issue]
+  sharing: [twitter,facebook,linkedin]
+  favicon: uff-brasao.jpg
+  page-footer:
+    left: |
+      Criação: Maqueise Pinheiro e Thaís Machado. <br>
+      Orientação: Douglas Rodrigues (UFF) e Karina Yaginuma (UFF). <br>
+      Colaboradores: Gabriel Miranda e Thiago Augusto.
+  repo-url: https://github.com/CienciaDeDadosUFF/cienciadedadosuff.github.io
+  downloads: [pdf]
+  
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - tipos-am.qmd
+    - pred.qmd
+    - design-pred.qmd
+    - erros-amostrais.qmd
+    - caret.qmd
+    - cross-valid.qmd
+    - comp-func.qmd
+    - teste-link.qmd
+     #   - references.qmd
+
+
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+  pdf:
+    documentclass: scrreprt
+
+editor: visual
+

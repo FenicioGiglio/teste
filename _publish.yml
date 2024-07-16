@@ -1,0 +1,6 @@
+- source: project
+  quarto-pub:
+    - id: e04dc550-0afc-4569-bbc7-b5d207c080ff
+      url: 'https://luanamoreno.quarto.pub/aprendizado-de-máquina-em-r'
+    - id: 6ad11695-3363-4ae5-9bce-b48664d83457
+      url: 'https://luanamoreno.quarto.pub/aprendizado-de-máquina-com-r'
