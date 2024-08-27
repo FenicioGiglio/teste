@@ -1,0 +1,149 @@
+```{=html}
+<style>
+.red-text {
+  color: red;
+}
+.blue-text {
+  color: blue;
+}
+</style>
+```
+# Métodos de Treino Baseados em Árvore
+
+Neste capítulo será estudado de forma mais aprofundada modelos de treinamento baseados em árvores, os quais são simples para interpretação, como: árvores de decisão e regressão, florestas aleatórias, adaboost, entre outros. O objetivo é entender o funcionamento dos mesmos, assim como os critérios que utilizam para classificarem as amostras.
+
+É importante deixar claro que para utilizarmos esses métodos podemos usar tanto dados numéricos quanto categóricos. Além disso, não é necessário padronizar os dados.
+
+## Árvores de Decisão
+
+Uma árvore de decisão, em geral, pergunta uma questão e classifica o elemento baseado na resposta. Ela utiliza os dados de cada indivíduo para criar uma regra de separação, que posteriormente será utilizada para rotular novas amostras.
+
+As árvores de decisão podem ser aplicadas aos problemas de regressão e classificação. Primeiro vamos considerar os problemas de classificação, e depois passamos para a regressão.
+
+## em Classificação
+
+Vejamos a seguir um exemplo de árvore de decisão para um problema de classificação.
+
+![](images/Ex_Arvores.png){fig-align="center"}
+
+**Nomenclatura**:
+
+-   **Nó Raiz ou Raiz**: é a variável que se encontra no topo da árvore;
+-   **Nós Internos ou Nós**: são as variáveis intermediárias, que possuem tanto setas apontandas para elas como saindo delas;
+-   **Nós Folhas ou Nós Terminais ou Folhas**: possuem apenas setas apontadas para elas. Representam a decisão final da árvore.
+
+![](images/Nomenclatura_Arvore.png){fig-align="center"}
+
+No processo de construção de uma árvore de decisão é importante ressaltar que a separação dos dados deve envolver apenas duas respostas: "Sim" ou "Não". Também é preciso definir a ordem das variáveis, como a variável com que se deve começar, qual deve ser a seguinte, e assim por diante. A solução para isso é obtida através do nível de **impureza** das variáveis.
+
+Dizemos que uma variável é **impura** quando ela não consegue separar bem os dados em uma árvore de decisão. Para calcularmos a impureza de uma variável utilizamos o **indíce Gini**, que varia entre 0 (mais puro possível) e 0,5 (mais impuro possível). Primeiramente calculamos o índice Gini para cada nó da variável, e em seguida obtemos o índice Gini da variável como uma média ponderada. O índice Gini de um nó é obtido por:
+
+Gini(nó) = 1 - $p_{S}^2$ - $p_{N}^2$, onde $p_{S^2}$ é a proporção de "sim" da resposta da variável de interesse e $p_{N}$ a proporção de "não" da resposta da variável de interesse.
+
+O **índice Gini** da variável é dado pela média do índice Gini para os nós referentes às respostas "Sim" e "Não" ponderada pela proporção dos elementos em cada nó.
+
+Gini(variável) = Gini(nó$_1$) $\times$ $P_1$ + Gini(nó$_2$) $\times$ $P_2$
+
+```{r}
+base = readRDS("SmallHeart.rds")
+head(base)
+```
+
+Nosso objetivo é prever se um indivíduo tem ou não uma doença cardíaca (variável "HeartDisease"), baseado nas outras variáveis. As variáveis explicativas são as seguintes:
+
+-   Sex: indica o sexo do indivíduo, onde "M" = Masculino e "F" = Feminino;
+-   ChestPain: referente ao indivíduo sentir dor no peito, onde "typical" = típico e "nontypical" = não típico;
+-   Thal: indica se o indivíduo possui Talassemia, onde "normal" = não possui, "fixed" = talassemia irreversível e "reversable" = talassemia reversível.
+
+Vamos verificar o quão bem as variáveis isoladamente são capazes de prever se o paciente possui ou não doença cardíaca. Vamos começar pela variável "Sex".
+
+```{r}
+summary(base$Sex)
+```
+
+Note que temos 22 indivíduos do sexo feminino e 50 indivíduos do sexo masculino. Como a resposta de um nó da árvore deve ser "Sim" ou "Não", vamos utilizar a variável "Sex=M".
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+```
+
+```{r message=FALSE}
+# Verificando quantos indivíduos possuem doença cardíaca de acordo com o sexo:
+
+base %>% group_by(Sex, HeartDisease) %>% summarise(N=n())
+```
+
+Então a variável "Sex=M" separa os pacientes da seguinte forma:
+
+![](images/Arvore_Sex.png){fig-align="center"}
+
+Note que a maioria dos pacientes com doença cardíaca terminaram na folha referente ao sexo masculino, mas a maioria dos que não possuem doença também. Já podemos ter uma ideia que essa variável não é tão boa em separar os dados, mas para averiguarmos essa hipótese vamos calcular o índice gini dela.
+
+Primeiramente vamos calcular o índice Gini do nó "Sex = M Sim":
+
+$Gini(Sex = M Sim)$ = 1 - $\left(\frac{14}{50}\right)^2$ - $\left(\frac{36}{50}\right)^2$ = $0,403$
+
+Agora vamos calcular o índice Gini do nó "Sex = M Não":
+
+$Gini(Sex = M Não)$ = 1 - $\left(\frac{2}{22}\right)^2$ - $\left(\frac{20}{22}\right)^2$ = $0,166$
+
+O índice Gini da variável "Sex = M" é dado pela média do índice Gini dos nós referentes às respostas "Sim" e "Não" ponderada pela frequência dos indivíduos em cada nó.
+
+$Gini(Sex = M)$ = $0,403$ $\times$ $\left(\frac{50}{72}\right)$ + $0,166$ $\times$ $\left(\frac{22}{72}\right)$ = $0,331$
+
+Como o índice Gini da variável "Sex = M" ficou mais próximo de 0,5 do que de 0, podemos constatar que ela é uma variável com baixa pureza. Note que se tivéssemos escolhido a variável "Sex = F" o índice Gini obtido seria o mesmo, pois "Sex = F Sim" é equivalente a "Sex = M Não" e "Sex = F Não" é equivalente a "Sex = M Sim". ou seja, as contas seriam as mesmas.
+
+Agora vamos realizar o mesmo processo para a variável "ChestPain", ou seja, vamos verificar o quão bem ela é capaz de prever se o paciente possui doença cardíaca.
+
+```{r}
+base %>% group_by(ChestPain) %>% summarise(N=n())
+```
+
+Note que temos 23 indivíduos que sentem dor no peito tipicamente e 49 indivíduos que não sentem tipicamente. Vamos verificar quantos deles possuem doença cardíaca:
+
+```{r}
+base %>% group_by(ChestPain, HeartDisease) %>% summarise(N=n())
+```
+
+Vamos considerar a variável "ChestPain = Typical". Ela separa os dados da seguinte forma:
+
+![](images/Arvore_Chest.png){fig-align="center"}
+
+Note que quase metade dos pacientes que possuem dor no peito têm doença cardíaca. Dos que não sentem a dor no peito, quase $\frac{1}{4}$ apenas possui a doença.
+
+Vamos calcular o índice Gini do nó "ChestPain = Typical Sim":
+
+$Gini(ChestPain = Typical Sim)$ = 1 - $\left(\frac{7}{23}\right)^2$ - $\left(\frac{16}{23}\right)^2$ = $0,423$
+
+Agora vamos calcular o índice Gini do nó "ChestPain = Typical Não":
+
+$Gini(ChestPain = Typical Não)$ = 1 - $\left(\frac{9}{49}\right)^2$ - $\left(\frac{40}{49}\right)^2$ = $0,299$
+
+O índice Gini da variável "ChestPain = Typical" é dado pela média do índice Gini dos nós referentes às respostas "Sim" e "Não" ponderada pela frequência dos indivíduos em cada nó.
+
+$Gini(Sex = M)$ = $0,423$ $\times$ $\left(\frac{23}{72}\right)$ + $0,299$ $\times$ $\left(\frac{49}{72}\right)$ = $0,339$
+
+Note que ela obteve um índice Gini um pouco maior do que a variável "Sex = M". Isso indica que a variável "Sex = M" é mais pura do que a variável "ChestPain = Typical".
+
+Agora falta apenas obter o índice Gini da variável "Thal". Mas diferentemente das outras 2 ela não possui apenas 2 níveis, e sim 3: "normal", "fixed" e "reversable".
+
+```{r}
+base %>% group_by(Thal) %>% summarise(N=n())
+```
+
+Nesse caso vamos ter que calcular o índice Gini para todas as combinações possíveis: "Thal = normal", "Thal = fixed", "Thal = reversable", "Thal = normal ou fixed", "Thal = normal ou reversable", "Thal = fixed ou reversable". Porém note que o índice Gini da variável "Thal = normal" é equivalente ao da variável "Thal = fixed ou reversable", pois "Thal = normal Sim" é o mesmo que "Thal = fixed ou reversable Não". Da mesma forma isso vale para as variáveis "Thal = fixed" e "Thal = normal ou reversable", e "Thal = reversable" e "Thal = normal ou fixed". Com isso conseguimos economizar algumas contas.
+
+```{r}
+base %>% group_by(Thal, HeartDisease) %>% summarise(N=n())
+```
+
+Vamos, primeiramente, olhar para a variável "Thal = normal". Ela separa os dados da seguinte forma:
+
+![](images/Arvore_Thal_normal.png){fig-align="center"}
+
+
+
+
+
+
+
