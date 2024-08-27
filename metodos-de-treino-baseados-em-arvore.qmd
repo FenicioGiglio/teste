@@ -1,13 +1,4 @@
-```{=html}
-<style>
-.red-text {
-  color: red;
-}
-.blue-text {
-  color: blue;
-}
-</style>
-```
+
 # Métodos de Treino Baseados em Árvore
 
 Neste capítulo será estudado de forma mais aprofundada modelos de treinamento baseados em árvores, os quais são simples para interpretação, como: árvores de decisão e regressão, florestas aleatórias, adaboost, entre outros. O objetivo é entender o funcionamento dos mesmos, assim como os critérios que utilizam para classificarem as amostras.
@@ -140,10 +131,3 @@ base %>% group_by(Thal, HeartDisease) %>% summarise(N=n())
 Vamos, primeiramente, olhar para a variável "Thal = normal". Ela separa os dados da seguinte forma:
 
 ![](images/Arvore_Thal_normal.png){fig-align="center"}
-
-
-
-
-
-
-
