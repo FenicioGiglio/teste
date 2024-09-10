@@ -2,8 +2,11 @@
 
 # Criando base SmallAdvertising.rds
 
-
-vendas = read.csv("advertising.csv")
-
+library(dplyr)
 
 
+vendas = read.csv("smalladvertising.csv")
+
+
+saveRDS(vendas,
+        file = "SmallAdvertising.rds")
