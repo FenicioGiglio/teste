@@ -217,9 +217,34 @@ Após obtidos esses novos nós, o processo continua se repetindo, obtendo novos 
 
 Pergunta: quando o processo de construção de uma árvore chega ao fim? O processo de construção pode terminar por 3 fatores:
 
-* Quando a pureza do nó é maior do que o de qualquer variável que adicionamos;
-* Quando atingimos folhas 100% puras (índice Gini = 0);
-* Quando o ganho ao aumentar a árvore é muito pequeno.
+-   Quando a pureza do nó é maior do que o de qualquer variável que adicionamos;
+-   Quando atingimos folhas 100% puras (índice Gini = 0);
+-   Quando o ganho ao aumentar a árvore é muito pequeno.
+
+O ganho ao aumentar a árvore pode ser resumido como um conjunto de atributos presentes na árvore que retornem o maior ganho de informações. Essa questão será melhor abordada posteriormente, juntamente com a questão de como podar as árvores (que está intimamente relacionada ao ganho) no subcapítulo \[XGBoost\].
+
+## Em Regressão
+
+Agora iremos discutir o processo de construção de uma árvore de regressão. Em uma árvore de regressão, diferentemente de uma árvore para classificação, cada folha possui um valor numérico (ao invés de categorias como "Sim" ou "Não", como no exemplo anterior da base SmallHeart). Vejamos a seguir um exemplo de árvore de decisão para um problema de regressão.
+
+![](images/Ex_Arvore_Reg.png)
+
+
+Esse valor numérico presente nas folhas não é nada menos que a média do valor da variável de interesse a ser prevista para os elementos que satisfazem a condição do nó. Por exemplo, na árvore de regressão acima a primeira folha dá como resultado uma eficácia de 5%: essa foi a média observada da eficácia do medicamento em pacientes com mais de 50 anos de idade. Para a segunda folha, a com eficácia de 20%: esse valor é a média da eficácia do medicamento em um indivíduo com menos de 50 anos de idade e que toma uma dosagem maior do que 29mg foi de 20%. O processo é o mesmo para as outras folhas.
+
+A grande pergunta é qual valor colocar no nó como condição. Para exemplificar como funciona o processo, vamos começar com um exemplo simples:
+
+**Ex.:** Vamos carregar o banco de dados “SmallAdvertising”. Este banco possui informações sobre as vendas de um produto em 10 mercados diferentes (variável sales), além de orçamentos de publicidade para esse produto em cada um dos mercados para três mídias diferentes: TV, rádio e jornal (variáveis TV, radio e newspaper, respectivamente).
+
+
+
+```{r}
+vendas = readRDS("SmallAdvertising.rds")
+
+vendas
+```
+
+
 
 
 
