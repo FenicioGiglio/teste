@@ -584,6 +584,7 @@ O pacote **randomForest** possui as ferramentas adequadas para a criação de um
 
 ```{r}
 balloons = readr::read_csv("balloons.csv")
+balloons = na.omit(balloons)
 # tratando todas as variaveis 
 balloons = dplyr::mutate_if(balloons, is.character, as.factor)
 balloons$inflated = as.factor(balloons$inflated)
@@ -608,21 +609,21 @@ Podemos ver que a precisão do nosso modelo é de 19/20, ou seja, 95%. Qual seri
 balloons = readr::read_csv("balloons.csv")
 # tratando todas as variaveis 
 balloons = dplyr::mutate_if(balloons, is.character, as.factor)
-balloons$Inflated = as.factor(balloons$Inflated)
+balloons$inflated = as.factor(balloons$inflated)
 # separando amostras teste/treino
 set.seed(45)
-inTrain = caret::createDataPartition(balloons$Inflated,p=0.5,list=F)
+inTrain = caret::createDataPartition(balloons$inflated,p=0.5,list=F)
 treino = balloons[inTrain,]
 teste = balloons[-inTrain,]
 # treinando o modelo
 controle = rpart::rpart.control(minsplit=0, cp = 0, maxdepth = 1)
 set.seed(342)
-modelo = rpart::rpart(Inflated~., data=treino, control = controle)
+modelo = rpart::rpart(inflated~., data=treino, control = controle)
 # aplicando o modelo no teste
 predicao = predict(modelo,teste, type="vector")
 predicao = factor(predicao, labels = c(F, T))
 # avaliando o erro na amostra treino
-confusionMatrix(teste$Inflated, predicao)
+confusionMatrix(teste$inflated, predicao)
 ```
 
 Note que nessa árvore, nosso modelo teve uma precisão de 80%. Bem menor do que o modelo de florestas.
@@ -655,8 +656,6 @@ ggplot(data=erro_OOB, aes(x=Arvores, y=Erro)) +
                          labels = c("Não Spam", "Spam"))
 ```
 
-
-
 ```{r}
 # construindo floresta com 50 arvores
 set.seed(23)
@@ -674,8 +673,6 @@ ggplot(data=erro_OOB, aes(x=Arvores, y=Erro)) +
                          breaks = c("nonspam", "spam"),
                          labels = c("Não Spam", "Spam"))
 ```
-
-
 
 ```{r}
 # construindo floresta com 100 arvores
@@ -695,8 +692,6 @@ ggplot(data=erro_OOB, aes(x=Arvores, y=Erro)) +
                          labels = c("Não Spam", "Spam"))
 ```
 
-
-
 ```{r}
 # construindo floresta com 1000 arvores
 set.seed(23)
@@ -715,41 +710,110 @@ ggplot(data=erro_OOB, aes(x=Arvores, y=Erro)) +
                          labels = c("Não Spam", "Spam"))
 ```
 
-
-
 Repare que após uma certa quantidade de árvores, o erro se estabiliza. Sendo assim, não é necessário utilizar grandes quantidades de árvores em todos os casos. É preciso verificar até onde existe ganho.
-
-
 
 ### Construindo uma floresta com o [train()]{.red-text}
 
-
-Também é possivel fazer florestas aleatórias usando a função [train]{.red-text} do pacote [caret]{.red-text}. Para isso, é necessário alterar o método de reamostragem para *out of bag* e o método para “rf” (*random forest*). Vamos utilizar a base [wine]{.red-text}, construiremos um regressor para predizer a variável [alcohol]{.red-text}.
-
-
+Também é possivel fazer florestas aleatórias usando a função [train]{.red-text} do pacote [caret]{.red-text}. Para isso, é necessário alterar o método de reamostragem para *out of bag* e o método para "rf" (*random forest*). Vamos utilizar a base [wine]{.red-text}, construiremos um regressor para predizer a variável [alcohol]{.red-text}.
 
 ```{r}
 # alterando o metodo de reamostragem
 controle = trainControl(method="oob")
 # chamando a base
 library(readr)
-wine = read_csv2("winequality-red.csv")
+wine = read_csv("winequality-red.csv")
 # construindo o modelo com 50 arvores
 set.seed(534)
 modelo = caret::train(alcohol ~ ., data=wine, method="rf", ntree=50, trControl=controle)
 modelo
 ```
 
-
-
-Note o valor “[mtry]{.red-text}” no modelo. Ele indica a quantidade de váriaveis da base que foram utilizadas para treinar o modelo. Repare que ele calcula a RMSE e $R^2$ para diferentes quantidades de variáveis usadas e utiliza no final a quantidade que possuir menor RMSE, no caso mtry=11. Caso queira fixar o número de variáveis usadas, basta usar o seguinte comando.
-
+Note o valor "[mtry]{.red-text}" no modelo. Ele indica a quantidade de váriaveis da base que foram utilizadas para treinar o modelo. Repare que ele calcula a RMSE e $R^2$ para diferentes quantidades de variáveis usadas e utiliza no final a quantidade que possuir menor RMSE, no caso mtry=11. Caso queira fixar o número de variáveis usadas, basta usar o seguinte comando.
 
 ```{r}
 tng = expand.grid(.mtry=7)
-modelo = caret::train(alcohol∼., data=wine, method="rf", ntree=50, trControl=controle, tuneGrid=tng)
+modelo = caret::train(alcohol~., data=wine, method="rf", ntree=50, trControl=controle, tuneGrid=tng)
 modelo
 ```
+
+### *AdaBoost*
+
+O método de treino AdaBoost se baseia na construção de uma floresta aleatória. Entretanto, na floresta construída por esse método as árvores possuem apenas um nó e duas folhas. Essas árvores são chamadas de tocos.
+
+![](images/Floresta_AdaBoost-01.png){fig-align="center"}
+
+Em geral, tocos não são muito bons em fazer classificações precisas, ou seja, eles são classificadores fracos. No entanto, o método AdaBoost os combina de forma a criar um bom aprendiz. Ele faz isso utilizando diferenciais na classificação e na construção das árvores que a floresta aleatória comum não utiliza:
+
+-   Floresta Aleatória: cada árvore de decisão tem um peso igual na classificação final das amostras. Além disso, cada árvore é construída independentemente das outras.
+
+-   AdaBoost: alguns tocos têm mais peso na classificação final do que outros, e a ordem de construção dos tocos importam. Em outras palavras, os erros que o primeito toco comete influenciam em como o segundo toco é construído, os erros que o segundo toco comete influenciam em como o terceiro toco é construído, e assim sucessivamente.
+
+Vamos ver os detalhes práticos de como funciona o AdaBoost utilizando o banco de dados golf. Este banco possui informações sobre condições climáticas e se o indivíduo jogou golf no dia. A ideia é tentar prever se o indivíduo vai jogar golf baseado nas outras variáveis.
+
+```{r}
+golf = readRDS("Golf.rds")
+golf
+```
+
+Primeiramente construímos um toco para cada uma das variáveis e calculamos seus respectivos índices Gini. Vamos começar com a variável Outlook.
+
+```{r}
+library(dplyr)
+golf %>% group_by(Outlook, Play) %>% summarise(N=n())
+```
+
+Então temos que "Outlook = Overcast" separa os dados da seguinte forma:
+
+![](images/AB_Overcast.png){fig-align="center"}
+
+**Gini(Outlook = Overcast)** $= \frac{4}{14} \times \left[1 - (\frac{1}{14})^2 - (\frac{0}{14})^2 \right] + \frac{10}{14} \times \left[ 1 - (\frac{5}{10})^2 - (\frac{5}{10})^2 \right] = 0,357$
+
+Vamos agora olhar para "Outlook = Rain":
+
+![](images/AB_Rain.png){fig-align="center"}
+
+**Gini(Outlook = Rain)** $= \frac{5}{14} \times \left[1 - (\frac{3}{5})^2 - (\frac{2}{5})^2 \right] + \frac{9}{14} \times \left[ 1 - (\frac{6}{9})^2 - (\frac{3}{9})^2 \right] = 0,457$
+
+![](images/AB_Sunny.png){fig-align="center"}
+
+Agora vamos para a variável Humidity.
+
+```{r}
+golf %>% group_by(Humidity, Play) %>% summarise(N=n())
+```
+
+Temos que "Humidity = High" separa os dados da seguinte forma:
+
+![](images/AB_High.png){fig-align="center"}
+
+**Gini(Humidity = High)** $= \frac{7}{14} \times \left[1 - (\frac{3}{7})^2 - (\frac{4}{7})^2 \right] + \frac{7}{14} \times \left[ 1 - (\frac{6}{7})^2 - (\frac{1}{7})^2 \right] = 0,367$
+
+Por último, a variável Wind:
+
+```{r}
+golf %>% group_by(Wind, Play) %>% summarise(N=n())
+```
+
+![](images/AB_Wind.png){fig-align="center"}
+
+
+**Gini(Wind = Strong)** $= \frac{6}{14} \times \left[1 - (\frac{3}{6})^2 - (\frac{3}{6})^2 \right] + \frac{8}{14} \times \left[ 1 - (\frac{6}{8})^2 - (\frac{2}{8})^2 \right] = 0,429$
+
+
+Logo, os índices Gini calculados foram:
+
+Variáveis | Índice Gini
+Outlook = Overcast |	0,357
+Outlook = Rain |	0,457
+Outlook = Sunny |	0,394
+Humidity = High |	0,367
+Wind = Strong |	0,429
+
+
+
+
+
+
 
 
 
