@@ -858,6 +858,335 @@ Feito isso, temos uma nova tabela de pesos:
 
 ![](images/tabela_adaboost2.png){fig-align="center"}
 
+Definidos os pesos, em seguida realizamos uma reamostragem via bootstrap (uma amostragem da própria amostra, com reposição) do mesmo tamanho da base de dados original. A probabilidade de um elemento da amostra ser sorteado é o peso dele.
+
+```{r}
+# Numerando os elementos da amostra:
+amostra = 1:14
+
+# Definindo as probabilidades dos elementos serem sorteados:
+pesos = rep(c(0.056, 0.099, 0.056, 0.099, 0.056), times = c(3,2,3,3,3))
+
+# Realizando o bootstrap:
+set.seed(271)
+sample(amostra, size = 14, replace = T, prob = pesos)
+```
+
+Então temos uma nova amostra formada pelos elementos sorteados na reamostragem:
+
+![](images/tabela_bootstrap.png){fig-align="center"}
+
+Agora, com essa nova amostra, fixamos pesos uniformes para os elementos e repetimos o processo de criação para o próximo toco. Em seguida verificamos os elementos que foram classificados de forma errada, aumentamos seus pesos no banco de dados e repetimos o processo de bootstrap, construindo, assim, o próximo toco. O processo se repete até que a floresta de tocos esteja concluída.
+
+Finalizada a floresta, realizamos a classificação final dos elementos somando os pesos dos tocos para cada classificação e selecionando o maior deles. Por exemplo, em uma floresta com 10 árvores onde 5 delas classificam a amostra na categoria de interesse como "positivo" e 5 delas classificam essa mesma amostra como "negativo", se a soma dos pesos das que classificaram a amostra como "positivo" for 2,7 e a das que classificaram a amostra como "negativo" for 0,84, a amostra será classificada como "positivo".
+
+### Adaboost com o pacote [adabag]{.red-text}
+
+Agora que já sabemos como funciona o *adaboost*, vamos botá-lo em prática através do pacote adabag. Vamos utilizar a base de dados spam.
+
+Inicialmente vamos separar a amostra em treino e teste.
+
+```{r}
+library(kernlab)
+data(spam)
+set.seed(16)
+noTreino = createDataPartition(y = spam$type, p = 0.7, list = F)
+treino = spam[noTreino,]
+teste = spam[-noTreino,]
+```
+
+Antes de realizarmos o adaboost precisamos definir a profundidade máxima que as árvores da floresta terão. Faremos isso através do comando rpart.control(). Como o objetivo é construir uma floresta de tocos, as árvores terão todas profundidade 1.
+
+```{r}
+library(rpart)
+controle = rpart.control(maxdepth = 1)
+```
+
+Agora vamos aplicar o método adaboost no conjunto treino utilizando o comando boosting().
+
+```{r}
+library(adabag)
+set.seed(16)
+modelo = boosting(formula = type~., data = treino, boos = T, mfinal = 100,
+                  coeflearn = "Breiman", control = controle)
+```
+
+Os principais argumentos dessa função são:
+
+-   formula = uma fórmula especificando qual variável queremos prever em função de qual(is);
+-   data = base de dados onde se encontram as variáveis;
+-   boos = argumento do tipo logical onde, se TRUE (default), utiliza bootstrap para criar uma nova amostra treino para a próxima árvore baseado nos erros da árvore anterior;
+-   mfinal = número de árvores da floresta;
+-   coeflearn = define qual fórmula será utilizada para o Amount of Say de cada árvore. A que vimos é a fórmula de Breiman (default);
+-   control = opções que controlam detalhes do algoritmo rpart.
+
+Para visualizarmos qualquer árvore da floresta utilizamos o comando rpart.plot().
+
+```{r}
+library(rpart.plot)
+
+# Visualizando a primeira árvore construída:
+rpart.plot(modelo$trees[[1]])
+```
+
+Por último, vamos aplicar o modelo na amostra teste e em seguida avaliar o modelo através da matriz de confusão.
+
+```{r}
+predicao = predict(modelo, teste)
+
+# Podemos obter a matriz de confusão com o seguinte comando:
+predicao$confusion
+```
+
+Ou utilizamos a função confusionMatrix() para, além da matriz de confusão, obtermos demais medidas avaliativas do modelo.
+
+```{r}
+# Transformando em fator para utilizar a função confusionMatrix():
+predicao$class = as.factor(predicao$class)
+teste$type = as.factor(teste$type)
+
+# Matriz de confusão e demais medidas avaliativas:
+confusionMatrix(predicao$class, teste$type, positive = "spam")
+```
+
+Repare que obtivemos uma ótima precisão e especificidade. A sensibilidade não foi tão boa quanto elas, mas talvez deva melhorar se aumentarmos o número de árvores da floresta.
+
+### Adaboost com o [train]{.red-text}
+
+Também podemos utilizar o adaboost através da função train(). Para isso basta escolhermos a opção "AdaBoost.M1" no argumento referente ao método de treino que será utilizado. Vamos fazer isso utilizando a base de dados College.
+
+```{r warning=FALSE, message=FALSE}
+college = readr::read_csv("College.csv")
+college = college[,-1]
+
+# Separando a amostra em treino e teste:
+set.seed(100)
+noTreino = caret::createDataPartition(y = college$Private, p = 0.7, list = F)
+treino = college[noTreino,]
+teste = college[-noTreino,]
+
+# Para utilizar o adaboost no train primeiramente precisamos fixar os parâmetros maxdepth,
+# coeflearn e mfinal:N
+controle = expand.grid(maxdepth = 1, coeflearn = "Breiman", mfinal = 10)
+
+# Treinando o modelo com o adaboost:
+set.seed(100)
+modelo = caret::train(Private~., method = "AdaBoost.M1", data = treino, tuneGrid = controle)
+modelo
+```
+
+Vamos aplicar o modelo no conjunto teste e avaliá-lo através da matriz de confusão.
+
+```{r warning=FALSE, message=FALSE}
+predicao = predict(modelo, teste)
+
+# Transformando em fator para depois construirmos a matriz de confusão:
+teste$Private = as.factor(teste$Private)
+
+# Construindo a matriz de confusão:
+confusionMatrix(predicao, teste$Private)
+```
+
+Note que obtivemos bons resultados mesmo utilizando apenas 10 árvores. A acurácia, em particular, foi maior que 0,9, o que já é um bom indicativo de que o modelo se adequou bem aos dados.
+
+## Gradiente Boosting
+
+### em Regressão
+
+De acordo com Jerome Friedman, o criador do Gradiente Boosting, evidências empíricas mostram que dar pequenos passos ou ir gradativamente na direção correta resulta em melhores predições na amostra teste, ou seja, menor variância.
+
+Para entendermos como funciona o Gradiente Boosting, considere a seguinte base de dados.
+
+```{r}
+##   Altura      Cor Sexo Peso
+## 1    1.6     Azul    M   88
+## 2    1.6    Verde    F   76
+## 3    1.5     Azul    F   56
+## 4    1.8 Vermelho    M   75
+## 5    1.5    Verde    M   77
+## 6    1.4     Azul    F   57
+```
+
+A primeira coisa a fazer é definir um número máximo de folhas de cada árvore. Para nosso exemplo, vamos definir 4 folhas, mas em geral, é definido uma quantidade de 8 a 32 folhas. Feito isso, tiramos uma média dos pesos dos indivíduos e essa será nossa primeira árvore, uma árvore só com a raiz.
+
+![](images/tocoGB.png){fig-align="center"}
+
+Agora, calculamos o **Pseudo-Resíduo**, o erro de previsão de cada indivíduo, da forma **Pseudo-Resíduo** $=$ **Valor Real** $-$ **Valor Predito** para cada observação. Então, por exemplo, o pseudo-resíduo da primeira observação vai ficar $88 - 71.5 = 16,5$.
+
+```{r}
+##   Altura      Cor Sexo Peso Ps..Res..1
+## 1    1.6     Azul    M   88       16.5
+## 2    1.6    Verde    F   76        4.5
+## 3    1.5     Azul    F   56      -15.5
+## 4    1.8 Vermelho    M   75        3.5
+## 5    1.5    Verde    M   77        5.5
+## 6    1.4     Azul    F   57      -14.5
+```
+
+O termo **pseudo-resíduo** é baseado em Regressão Linear, onde o resíduo é a diferença entre os valores observados e estimados. O termo "pseudo" serve para lembrar que estamos fazendo **Gradiente Boosting** e não Regressão Linear.
+
+O próximo passo é, utilizando as variáveis explicativas (Altura, Cor e Sexo), construir uma árvore de decisão respeitando o máximo de folhas definido anteriormente. Mas ela deve **predizer o pseudo-resíduo** e não o Peso.
+
+![](images/GB1.png){fig-align="center"}
+
+Note que temos mais observações do que folhas, sendo assim, podemos ter mais que um resultado em cada uma. Nesse caso, substituímos os valores pela média das folhas.
+
+![](images/GB2.png){fig-align="center"}
+
+Agora somamos o resultado das duas árvores para classificar na primeira observação, por exemplo, a predição seria $71,5 + 16,5 = 88$. Acertamos exatamente o valor real. Isso é bom? Não. Já vimos como não é bom ter um modelo muito ajustado. Temos pouco viés, mas provavelmente alta variância.
+
+O Gradiente Boosting lida com esse problema usando uma taxa de aprendizado para reescalar a contribuição da nova árvore. A taxa de aprendizado é um número entre 0 e 1 e deve ser multiplicado ao valor da segunda árvore em diante. Para esse exemplo, vamos adotar uma taxa de 0.1, assim a predição da primeira observação seria $71,5 + (0,1 \times 16,5) = 73,15$. A predição não ficou tão boa, mas é um pouco melhor do que o resultado de apenas uma árvore.
+
+Feito isso, recalculamos os valores do pseudo-resíduo.
+
+```{r}
+##   Altura      Cor Sexo Peso Ps..Res..1 Ps..Res..2
+## 1    1.6     Azul    M   88       16.5      14.85
+## 2    1.6    Verde    F   76        4.5       4.05
+## 3    1.5     Azul    F   56      -15.5     -14.00
+## 4    1.8 Vermelho    M   75        3.5       3.05
+## 5    1.5    Verde    M   77        5.5       5.05
+## 6    1.4     Azul    F   57      -14.5     -13.00
+```
+
+Repare que o valor do segundo pseudo-resíduo diminuiu em módulo em relação ao primeiro, ou seja, nos aproximamos mais do valor correto do que da primeira vez.
+
+Agora, utilizando novamente as variáveis explicativas, construímos outra árvore agora para predizer o segundo pseudo-resíduo.
+
+![](images/GB3.png){fig-align="center"}
+
+Note que a estrutura da segunda árvore construída ficou semelhante a primeira. Isso não acontece sempre, mas pode acontecer.
+
+Agora, a classificação da primeira observação ficaria $71.5+(0.116.5)+(0.114.85)=74.635$ um pouco mais perto do verdadeiro valor. Repetimos esse procedimento quantas vezes se queira ou até não ter redução significante dos valores do pseudo-resíduo. Dessa forma temos uma sequência de árvores que caminham em direção ao valor correto em passos pequenos.
+
+É importante notar que todas as árvores devem possuir a mesma taxa de aprendizado.
+
+### Construindo um regressor com o pacote **gbm**
+
+Para nosso exemplo, vamos utilizar a base de dados **Wage** do pacote ISLR. Para isso, vamos precisar limpar os dados removendo variáveis de variância zero.
+
+```{r warning=FALSE, message=FALSE}
+# lendo a base de dados
+library(ISLR)
+data("Wage")
+# removendo variaveis de variancia zero
+vvz = nearZeroVar(Wage,saveMetrics = F)
+vvz
+```
+
+```{r warning=FALSE, message=FALSE}
+Wage = Wage[,-vvz]
+```
+
+Dividimos a base nos conjuntos de treino e teste.
+
+```{r warning=FALSE, message=FALSE}
+set.seed(100)
+noTreino = createDataPartition(Wage$wage,p=0.7,list=F)
+treino = Wage[noTreino,]
+teste = Wage[-noTreino,]
+```
+
+Agora vamos aplicar o gradiente boosting com a função **gbm()**
+
+```{r warning=FALSE, message=FALSE}
+library(gbm)
+set.seed(100)
+modelo = gbm(wage~.,data=treino, distribution="gaussian",
+              n.trees =300,interaction.depth = 20)
+modelo
+```
+
+Os principais argumentos da função gbm() são:
+
+-   **distribution:** gaussian se for regressão, multinomial se for um classificação, bernoulli se for classificação 0-1.
+-   **n.trees:** número de árvores da floresta.
+-   **interaction.depth:** profundidade máxima das árvores.
+
+Vamos aplicar o modelo na amostra teste, e avaliar o resultado.
+
+```{r warning=FALSE, message=FALSE}
+predicao = predict(modelo, teste, n.trees=300)
+# avaliando
+postResample(predicao,teste$wage)
+```
+
+Note que utilizamos 300 árvores. Mas pode ser que não seja necessário essa quantidade de árvores pra alcançar esses valores de $R^2$, RMSE e MAE. Para saber a quantidade ideal de árvores, isto é, quando erro se estabiliza, podemos utilizar a função [gbm.perf()]{.red-text}.
+
+```{r}
+gbm.perf(modelo)
+```
+
+Sendo assim, com apenas 50 árvores teríamos chegado a um resultado razoável.
+
+```{r}
+predicao2 = predict(modelo, teste, n.trees=50)
+postResample(predicao2,teste$wage)
+```
+
+Podemos ver que o RMSE e o MAE aumentaram um pouco, porém o $R^2$ foi praticamente o mesmo. E como tivemos um custo computacional muito menor, podemos concluir que esse modelo com 50 árvores acaba sendo melhor do que o com 300.
+
+### em Classificação
+
+Considere a seguinte base de dados
+
+```{r}
+## # A tibble: 6 x 4
+##   `Gosta de Pipoca` Idade `Cor Favorita` `Troll 2`
+##   <chr>             <dbl> <chr>          <chr>    
+## 1 Sim                  12 Azul           Ama      
+## 2 Sim                  87 Verde          Ama      
+## 3 Nao                  44 Azul           Odeia    
+## 4 Sim                  19 Vermelho       Odeia    
+## 5 Nao                  32 Verde          Ama      
+## 6 Nao                  14 Azul           Ama
+```
+
+Queremos predizer se uma pessoa ama o filme Troll 2 baseado em seu gosto por pipoca, idade e cor favorita. Assim como em regressão, começamos o método de Gradiente Boosting usando uma árvore raiz que represente nossa predição inicial para cada observação. Em regressão usamos a média das observações, em classificação vamos usar o log(chances). Olhando na base de dados, podemos dizer que as chances de alguém amar Troll 2 é **chances** $= \frac{\text{quantidade de indivíduos que amaram}}{\text{quantidade de indivíduos que odiaram}} = \frac{4}{2}$, e portanto, o $log(chances) = log(\frac{4}{2}) = 0,6932$ e é isso que colocaremos na folha inicial.
+
+![](images/tocoGBC.png){fig-align="center"}
+
+O jeito mais fácil de usar o log(chances) para classificar é convertendo em probabilidade, e fazemos isso usando a seguinte função:
+
+::: {style="text-align: center;"}
+**Probabilidade** $= \frac{e^{log(chances)}}{1 + e^{log(chances)}}$
+:::
+
+Sendo assim, a **Probabilidade de alguém amar Troll 2** $= \frac{e^{log(\frac{4}{2})}}{1 + e^{log(\frac{4}{2})}} = \frac{2}{3} = 0,6667$.
+
+![](images/tocoGBC2.png){fig-align="center"}
+
+É importante notar que o log(chances) e a probabilidade só ficaram iguais por causa da aproximação.
+
+Vamos criar o seguinte classificador:
+
+-   Probabilidade acima de 0,5: classificamos que ama Troll 2;
+-   Probabilidade menor ou igual a 0,5: classificamos que odeia Troll 2.
+
+Como a probabilidade ficou maior que 0,5 classificamos todos no treino como indivíduos que amam Troll 2.
+
+Embora 0,5 seja um limite usual para tomada de decisão baseada em probabilidade, poderiamos tranquilamente usar um valor diferente.
+
+Mas a classificação não ficou muito boa já que 2 indivíduos foram classificados erroneamente. Podemos mensurar quão ruim foi a predição calculando o **pseudo-resíduo = observado - predito**. Para essa conta, perceba que se um indivíduo ama Troll 2, então a probabilidade dele amar Troll 2 é 1. Semelhantemente, se ele odeia, a probabilidade dele amar é 0. Assim, calculamos os pseudo-resíduos.
+
+```{r}
+## # A tibble: 6 x 5
+##   `Gosta de Pipoca` Idade `Cor Favorita` `Troll 2` `Ps. Res. 1`
+##   <chr>             <dbl> <chr>          <chr>            <dbl>
+## 1 Sim                  12 Azul           Ama                0.3
+## 2 Sim                  87 Verde          Ama                0.3
+## 3 Nao                  44 Azul           Odeia             -0.7
+## 4 Sim                  19 Vermelho       Odeia             -0.7
+## 5 Nao                  32 Verde          Ama                0.3
+## 6 Nao                  14 Azul           Ama                0.3
+```
+
+Agora construímos uma árvore utilizando as variáveis explicativas para predizer o pseudo-resíduo. Assim como o Gradiente Boosting para regressão, temos que definir um número máximo de folhas em cada árvore. Aqui vamos limitar a 3 folhas, mas na prática geralmente é um número entre 8 e 32.
+
+![](images/tocoGBC3.png){fig-align="center"}
+
+
+Em regressão, os valores das folhas representavam os resíduos. Mas em classificação isso é mais complexo. Isso porque a predição está em log(chances) e as folhas são provenientes de probabilidade. Portanto não podemos apenas somá-las para uma nova predição sem alguma transformação. A transformação mais comum por folha é
 
 
 
