@@ -1185,8 +1185,293 @@ Agora construímos uma árvore utilizando as variáveis explicativas para prediz
 
 ![](images/tocoGBC3.png){fig-align="center"}
 
+Em regressão, os valores das folhas representavam os resíduos. Mas em classificação isso é mais complexo. Isso porque a predição está em log(chances) e as folhas são provenientes de probabilidade. Portanto não podemos apenas somá-las para uma nova predição sem alguma transformação. A transformação mais comum por folha é:
 
-Em regressão, os valores das folhas representavam os resíduos. Mas em classificação isso é mais complexo. Isso porque a predição está em log(chances) e as folhas são provenientes de probabilidade. Portanto não podemos apenas somá-las para uma nova predição sem alguma transformação. A transformação mais comum por folha é
+::: {style="text-align: center;"}
+$\frac{\sum \text{residuos}}{\sum{[probabilidade \space anterior \space \times \space (1 - probabilidade \space anterior)]}}$
+:::
+
+Assim, da esquerda pra direita, para primeira folha temos:
+
+$\frac{\sum \text{residuos}}{\sum{[probabilidade \space anterior \space \times \space (1 - probabilidade \space anterior)]}} = \frac{-0.7}{0.7 \times (0.3)} = -0.3333$, para a segunda
+
+$\frac{\sum \text{residuos}}{\sum{[probabilidade \space anterior \space \times \space (1 - probabilidade \space anterior)]}} = \frac{0.3 - 0.7}{0.7 \times (1 - 0.7) + 0.7 \times (1-0.7)} = -0.9524$, e para a última
+
+$\frac{\sum \text{residuos}}{\sum{[probabilidade \space anterior \space \times \space (1 - probabilidade \space anterior)]}} = \frac{0.3 + 0.3 + 0.3}{0.7 \times (1 - 0.7) + 0.7 \times (1-0.7) + 0.7 \times (1-0.7)} = 1.4286$
+
+Por enquanto, a probabilidade anterior é a mesma para todos, mas a partir da próxima árvore isso muda.
+
+![](images/tocoGBC4.png){fig-align="center"}
+
+Agora que todas as folhas foram alteradas, podemos somar os resultados escalados pela taxa de aprendizado. Nesse exemplo, vamos usar uma taxa alta, 0.8. Mas geralmente se usa 0.1. E então calculamos o novo
+
+$log(chances) = log(chances) \space anterior + taxa \space de \space aprendizado \space \times \space log(chances)$ obtido na árvore.
+
+Para primeira observação, por exemplo, fica $log(chances) = 0.7 = (0.8 \times 1.4) = 1.82$ e então convertemos em probabilidade $\frac{e^{1.82}}{1 + e^{1.82}} = 0.8606$. Então, note que fizemos progresso, já que o indivíduo em questão ama Troll 2. Antes ele foi classificado corretamente mas com probabilidade 0.7, agora ele foi classificado corretamente mas com probabilidade 0.9.
+
+```{r}
+## # A tibble: 6 x 5
+##   `Gosta de Pipoca` Idade `Cor Favorita` `Troll 2` `Prob. Predita`
+##   <chr>             <dbl> <chr>          <chr>               <dbl>
+## 1 Sim                  12 Azul           Ama                   0.9
+## 2 Sim                  87 Verde          Ama                   0.5
+## 3 Nao                  44 Azul           Odeia                 0.5
+## 4 Sim                  19 Vermelho       Odeia                 0.1
+## 5 Nao                  32 Verde          Ama                   0.9
+## 6 Nao                  14 Azul           Ama                   0.9
+```
+
+Pode ser que a previsão fique pior, como no caso do segundo indivíduo. E essa é a razão de construírmos várias árvores e não só uma.
+
+Calculamos os novos pseudo-resíduos que agora serão diferentes para cada observação.
+
+```{r}
+## # A tibble: 6 x 5
+##   `Gosta de Pipoca` Idade `Cor Favorita` `Troll 2` `Ps. Res. 2`
+##   <chr>             <dbl> <chr>          <chr>            <dbl>
+## 1 Sim                  12 Azul           Ama                0.1
+## 2 Sim                  87 Verde          Ama                0.5
+## 3 Nao                  44 Azul           Odeia             -0.5
+## 4 Sim                  19 Vermelho       Odeia             -0.1
+## 5 Nao                  32 Verde          Ama                0.1
+## 6 Nao                  14 Azul           Ama                0.1
+```
+
+Construímos uma segunda árvore agora para prever os novos pseudo-resíduos e fazemos a transformação para log(chances) para cada folha.
+
+![](images/tocoGBC5.png){fig-align="center"}
+
+Combinamos com as árvores anteriores para obter um valor de saída e transformamos em Probabilidade para classificar. Por exemplo, a primeira observação ficaria:
+
+$log(chances)=0.7+(0.81.4)+(0.80.6)=2.3$
+
+e então, convertendo em probabilidade:
+
+$\frac{e^{1.82}}{1+e^{1.82}} = 0.9089$
+
+Dessa forma, continuamos construíndo quantas árvores forem necessárias.
+
+### Construindo um classificador com o pacote [gbm]{.red-text}
+
+O gradiente boosting para classificação no R é semelhante ao para regressão, atentando para o argumento distribution, que deve ser igual a "bernoulli" se a variável de interesse tiver apenas duas respostas possíveis (como no caso da bse Troll 2) ou "multinomial" se a variável tiver mais de duas respostas possíveis. Por exemplo, considere a base Vehicle do pacote mlbench. Nela, estamos interessados em classificar a variável Class, que pode ser bus, opel, saab ou van.
+
+```{r}
+# lendo a base
+library(mlbench)
+data(Vehicle)
+# dividindo em treino e teste
+library(caret)
+set.seed(100)
+noTreino = createDataPartition(Vehicle$Class,p=0.7,list=F)
+treino = Vehicle[noTreino,]
+teste = Vehicle[-noTreino,]
+# treinando o modelo
+library(gbm)
+set.seed(100)
+modelo = gbm(Class~.,data=treino,distribution="multinomial",
+              n.trees = 100,interaction.depth = 8)
+```
+
+Quando aplicamos o predict(), o que recebemos de retorno são um conjunto de probabilidades (ou o log(chances)), e não a classificação final. Cabe ao pesquisador definir a regra de classificação final.
+
+```{r}
+predicao = predict(modelo, teste, n.trees = 100, type = 'response')
+```
+
+```{r}
+# Criando a regra de classificacao
+k = dim(teste)[1]
+classe = c()
+for (i in 1:k){
+  classe[i] = names(which.max(predicao[i,1:4,1])) 
+}
+head(classe)
+```
+
+```{r}
+# verificando quantidade de arvores necessarias
+gbm.perf(modelo)
+```
+
+```{r}
+# avaliando o modelo 
+confusionMatrix(data=as.factor(classe), reference=as.factor(teste$Class))
+```
+
+Note que o modelo obteve uma precisão razoável de 75,79%.
+
+## XGBoost
+
+O XGBoost é a abreviação de **Extreme Gradient Boost**. Ele foi desenvolvido para suportar um grande volume de dados de forma eficiente. Geralmente é 10 vezes mais rápido que o Gradiente Boosting.
+
+### Em Regressão
+
+Apesar do XGBoost ser usado para lidar com bases grandes, vamos usar uma base de dados bem pequena só para entendermos melhor como ele funciona. Para isso considere a seguinte situação: queremos predizer o peso de um indivíduo em função de sua altura.
+
+```{r}
+# lendo e vizualizando a base
+library(readr)
+peso = read_csv2("peso-altura.csv")
+library(ggplot2)
+ggplot(peso, aes(x=Altura, y=Peso)) + geom_point(lwd=5, colour = "deeppink3") + 
+  theme_minimal() + ylim(c(50,90)) + xlim(c(1.3,1.9))
+```
+
+O primeiro passo é fazer uma predição inicial, que pode ser qualquer uma. O default é usar 0,5, mas como estamos falando de peso, vamos utilizar a predição inicial "Peso = 70".
+
+![](images/xgb1.png){fig-align="center"}
+
+Agora precisamos calcular os resíduos (diferença entre o valor real e o valor predito) que vão nos mostrar quão boa é essa predição.
+
+```{r}
+library(dplyr)
+(peso = peso %>% mutate( residuos = Peso-70 ))
+```
+
+Assim como no Gradiente Boosting, o próximo passo é construir uma árvore para predizer os resíduos. Mas o XGBoost utiliza uma árvore de regressão diferente que vamos chamar de árvore XGB. Existem muitas formas de construir uma árvore XGB. Vamos aprender a mais comum. A árvore XGB inicia com uma folha que leva todos os resíduos.
+
+![](images/xgb2.png){fig-align="center"}
+
+Em seguida, calculamos um índice de qualidade ou **Índice de Similaridade**.
+
+$\text{Índice de Similaridade} = \frac{(\sum \text{resíduos})^2}{\text{número de resíduos} + \lambda}$
+
+Onde $\lambda$ (Lambda) é um parâmetro de regularização, o que significa que tem o objetivo de reduzir a sensibilidade das observações individuais, ou seja, reduzir o sobreajuste. Por enquanto, vamos considerar $\lambda = 0$ porque esse é o valor default. Sendo assim, o Índice de similaridade da raiz é $\frac{(18 + 6 - 14 + 5 - 10)^2}{5 + 0} = \frac{5^2}{5} = 5$.
+
+![](images/xgb3.png){fig-align="center"}
+
+Agora vamos ver se conseguimos melhorar esse índice dividindo os resíduos, ou seja, criando uma ramificação. Vamos começar dividindo a variável **Altura** na média entre os dois menores valores, que são 1.4 e 1.5, e calculando o Indice para as novas folhas.
+
+Observe que nas folhas não estarão as alturas e sim os resíduos correspondentes a altura especificada.
+
+![](images/xgb4.png){fig-align="center"}
+
+Agora, precisamos calcular o ganho dessa ramificação para ver o quanto ela foi efetiva. O ganho é calculado da seguinte forma:
+
+Agora, precisamos calcular o ganho dessa ramificação para ver o quanto ela foi efetiva. O ganho é calculado da seguinte forma:
+
+\$ganho = IS\_{folha \space da \space esquerda} + IS\_{folha \space da \space direita - IS\_{raiz}} \$.
+
+Assim, o ganho da ramificação $Altura < 1.45$ é \$100 + 56.25 - 5 =151.25 \$. Vamos fazer esse calculo em todas as ramificações possiveis, Isto é, se temos 5 observações com diferentes alturas, vamos ter 4 ramificações possiveis: **Altura\<1.45**, **Altura\<1.55**, **Altura\<1.65** e **Altura\<1.75**.
+
+![](images/xgb5.png){fig-align="center"}
+
+Podemos ver que o ganho de usar a ramificação 'Altura\<1.55' é maior, portanto é essa que vamos usar. Agora vamos ramificar as folhas da mesma maneira e escolher as que tiverem melhor ganho.
+
+Nesse exemplo, vamos limitar a profundidade da árvore XGB em 2. Mas o default é permitir até 6 níveis de profundidade.
+
+Nossa árvore XGB final ficou:
+
+![](images/xgb6.png){fig-align="center"}
+
+Agora, vamos podar nossa árvore. Fazemos isso porque pode ser que algum nó tenha o ganho muito baixo e por isso não vale a pena estar na árvore. Para decidir se vamos tirar algum nó e, se sim, qual, vamos escolher um valor que será chamado de $\gamma$ (gamma). Em seguida, calculamos a diferença entre o ganho associado ao nó e $\gamma$, se essa diferença for negativa, então removemos o nó.
+
+$\gamma$ especifica o ganho mínimo necessario para fazer uma divisão. Seu default é 0. Quanto maior, mais conservador é o modelo.
+
+Mesmo quando $\gamma = 0$ isso não previne podas.
+
+Vamos escolher $\gamma = 10$. Começando sempre dos nós mais profundos para a raiz, vamos avaliar a diferença entre o ganho e $\gamma$. No nó mais à direita temos que o ganho é 32.7, portanto a diferença é $32.7 - 10 = 22.7$. Como o resultado é positivo, o nó permanece. No nó à esquerda, a diferença fica $8 - 10 = -2$, e, como o resultado é negativo, retiramos esse nó. Assim, estamos dizendo que o ganho do nó à esquerda não é bom o suficiente pra justificar essa ramificação. Como o nó à direita permaneceu na árvore, não faz sentido calcular essa diferença para o nó raiz.
+
+Mesmo se o valor da diferença der negativo nos nós de cima, se não removermos o de baixo, o de cima não é removido.
+
+Com isso, nossa árvore XGB ficou:
+
+![](images/xgb7.png){fig-align="center"}
+
+Note que se tivéssemos escolhido umNote que se tivéssemos escolhido um $\gamma$ muito alto, por exemplo $\gamma = 570$, toda árvore seria podada. É preciso cuidado.
+
+Agora vamos voltar ao inicio e reconstruir a árvore agora usando $\lambda = 1$ (Lembra do $\lambda$? aquele da fórmula do índicador de similaridade!). Para facilitar a vizualização, vamos omitir os cálculos. A nova árvore XGB ficou:
+
+![](images/xgb8.png){fig-align="center"}
+
+Podemos notar que quando $\lambda > 0$, o índice de similaridade é menor. O que significa que se mantivermos o mesmo $\gamma$, a poda será mais extrema. Por outro lado, deixar $\lambda > 0$ ajuda a previnir sobreajustes.
+
+Agora que temos árvore final, vamos calcular os valores de saída das folhas.
+
+\$\text{valores de saída} = \frac{\sum \text{soma dos resíduos}}{\text{número de resíduos} + \lambda} \$. Repare que essa fórmula é bem parecida com a do índice de similaridade, mas a soma dos resíduos não está ao quadrado.
+
+Repare que, como $\lambda = 0$, o valor de saida é uma média aritmética simples entre os resíduos. Mas note que se $\lambda > 0$ e a folha tiver apenas uma observação, isso reduzira a sensibilidade dessa observação individual evitando sobreajuste.
+
+![](images/xgb9.png){fig-align="center"}
+
+Assim a primeira árvore está completa e, como em Gradient Boosting, fazemos novas predições começando com a predição inicial e somando com o resultado da árvore XGB escalada pela taxa de aprendizado.
+
+O XGBoost chama a taxa de aprendizado de $\epsilon$ (eta) e seu valor default é 0.3, que é o que vamos usar.
+
+![](images/xgb10.png){fig-align="center"}
+
+Por exemplo, se a gente pegasse a primeira observação (indivíduo com altura=1.7), seu peso predito seria $predicao \ inicial + \epsilon \ valor\ de\ saida\ da \ árvore\ XGB = 70+0.312=73.6$ que é mais perto do seu peso real (que era 88) do que a predição anterior (70). Assim, com as novas predições, os novos resíduos ficaram:
+
+
+
+```{r}
+nova_pred = c(73.6, 73.6, 66.4, 71.5, 66.4)
+(peso = peso %>% mutate( residuos2 = Peso - nova_pred ))
+```
+
+
+
+Perceba que o novo resíduo é melhor que o anterior (seu valor absoluto é mais próximo de 0). Ou seja, estamos dando pequenos passos na direção correta.
+
+Agora construímos outra árvore XGB da mesma forma, mas para predizer os novos resíduos, Dessa forma obteremos previsões com resíduos menores. E continuamos construíndo árvores XGB até que os resíduos sejam bem pequenos ou até atingir o número de árvores desejado.
+
+
+### Construindo um regressor com o pacote xgboost
+
+
+Vamos usar a base de dados [winequality-red]{.red-text}. O objetivo dessa base é prever a qualidade do vinho baseado em suas outras variáveis. Mas nós vamos tentar prever o nível alcoólico do vinho.
+
+
+```{r}
+library(readr)
+wine = read_csv("winequality-red.csv")
+str(wine)
+```
+
+
+Como sempre, vamos dividir a base em amostra de treino e amostra de teste.
+
+
+```{r}
+library(caret)
+set.seed(100)
+noTreino = createDataPartition(wine$alcohol, p = 0.7, list = F)
+# vendo a classe da base de dados
+class(wine)
+```
+
+
+O pacote xgboost só lê matrizes. Então teremos que transformar a base numa matriz. Além disso, teremos que separar a váriavel de interesse das variáveis explicativas.
+
+
+```{r}
+# Transformando a base em matriz
+wine = as.matrix(wine)
+class(wine)
+```
+
+
+```{r}
+# separando amostra treino e teste
+treino       = wine[noTreino,-11] # a variável 'alcohol' é a 11ª coluna
+treino_label = wine[noTreino, 11]
+
+teste       = wine[-noTreino,-11]
+teste_label = wine[-noTreino, 11]
+```
+
+
+Agora, podemos usar a função xgboost para criar nosso modelo.
+
+
+```{r}
+library(xgboost)
+set.seed(100)
+modelo = xgboost(data = treino, label = treino_label,
+                 gamma=0, eta=0.3, 
+                 nrounds = 100, objective = "reg:squarederror", 
+                 verbose = 0)
+```
 
 
 
