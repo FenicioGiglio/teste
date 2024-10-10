@@ -1402,25 +1402,18 @@ O XGBoost chama a taxa de aprendizado de $\epsilon$ (eta) e seu valor default é
 
 Por exemplo, se a gente pegasse a primeira observação (indivíduo com altura=1.7), seu peso predito seria $predicao \ inicial + \epsilon \ valor\ de\ saida\ da \ árvore\ XGB = 70+0.312=73.6$ que é mais perto do seu peso real (que era 88) do que a predição anterior (70). Assim, com as novas predições, os novos resíduos ficaram:
 
-
-
 ```{r}
 nova_pred = c(73.6, 73.6, 66.4, 71.5, 66.4)
 (peso = peso %>% mutate( residuos2 = Peso - nova_pred ))
 ```
 
-
-
 Perceba que o novo resíduo é melhor que o anterior (seu valor absoluto é mais próximo de 0). Ou seja, estamos dando pequenos passos na direção correta.
 
 Agora construímos outra árvore XGB da mesma forma, mas para predizer os novos resíduos, Dessa forma obteremos previsões com resíduos menores. E continuamos construíndo árvores XGB até que os resíduos sejam bem pequenos ou até atingir o número de árvores desejado.
 
-
 ### Construindo um regressor com o pacote xgboost
 
-
 Vamos usar a base de dados [winequality-red]{.red-text}. O objetivo dessa base é prever a qualidade do vinho baseado em suas outras variáveis. Mas nós vamos tentar prever o nível alcoólico do vinho.
-
 
 ```{r}
 library(readr)
@@ -1428,9 +1421,7 @@ wine = read_csv("winequality-red.csv")
 str(wine)
 ```
 
-
 Como sempre, vamos dividir a base em amostra de treino e amostra de teste.
-
 
 ```{r}
 library(caret)
@@ -1440,16 +1431,13 @@ noTreino = createDataPartition(wine$alcohol, p = 0.7, list = F)
 class(wine)
 ```
 
-
 O pacote xgboost só lê matrizes. Então teremos que transformar a base numa matriz. Além disso, teremos que separar a váriavel de interesse das variáveis explicativas.
-
 
 ```{r}
 # Transformando a base em matriz
 wine = as.matrix(wine)
 class(wine)
 ```
-
 
 ```{r}
 # separando amostra treino e teste
@@ -1460,9 +1448,7 @@ teste       = wine[-noTreino,-11]
 teste_label = wine[-noTreino, 11]
 ```
 
-
 Agora, podemos usar a função xgboost para criar nosso modelo.
-
 
 ```{r}
 library(xgboost)
@@ -1473,12 +1459,137 @@ modelo = xgboost(data = treino, label = treino_label,
                  verbose = 0)
 ```
 
+Os principais argumentos da função xgboost são:
+
+-   data: recebe a amostra treino apenas com as variáveis explicativas;
+-   label: recebe a variável de interesse;
+-   gamma: ganho mínimo necessário para fazer uma divisão;
+-   eta: taxa de aprendizado;
+-   nrounds: representa o número de iterações;
+-   objective: é o tipo de predição que será feita. Para mais informações, veja nesse site.;
+-   verbose: se for 1, que é o default, o xgboost vai imprimir informações de desempenho a cada iteração. Se for 0, não vai imprimir nada.
+
+Para fazer a predição usamos o conhecido predict(). Em seguida, vamos avaliar os resultados do modelo utilizando a função defaultSummary() do pacote caret. Essa função nos retorna os valores do RMSE, $R^2$ e MAE do modelo. Para isso devemos passar como argumento um dataframe onde a primeira coluna são os valores observados dos rótulos do conjunto teste e a segunda coluna são os valores preditos pelo modelo.
+
+```{r}
+predicao = predict(modelo,teste)
+# Calculando o RMSE do modelo:
+caret::defaultSummary(data.frame(obs = teste_label, pred = predicao))
+```
+
+Considerando a escala em que os dados se encontram, o valor do RMSE foi um pouco grande. Em contrapartida podemos considerar os valores do MAE e do $R^2$ como sendo razoáveis para o modelo. Em particular, um $R^2$ de aproximadamente 0,7881 nos indica que o modelo tem um poder de explicação de 78,81%.
+
+### Em Classificação
+
+Para entendermos como o XGBoost funciona para problemas de classificação, vamos utilizar a base de dados a seguir. O objetivo é prever se a universidade é pública ou privada baseado nos pedidos para ingresso.
+
+OBS: Assim como comentado anteriormente em regressão, o XGBoost foi projetado para bases de dados grandes, mas para fins didáticos iremos utilizar uma base bem pequena.
+
+```{r}
+library(readxl)
+college = read_excel("SmallCollege.xlsx")
+college
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+# Construindo um gráfico para os pedidos para ingresso x tipo da universidade:
+college %>% ggplot(aes(x = Apps, y = Private)) + geom_point(lwd = 5, aes(colour = Private)) +
+  guides(col = F) + theme_minimal() + ggtitle("Pedidos para Ingresso x Tipo da Universidade") +
+  xlab("Pedidos para Ingresso") + ylab("Universidade Privada")
+```
+
+O primeiro passo é fazer uma predição inicial. Essa predição pode ser qualquer valor, como por exemplo a probabilidade de observar universidades públicas no conjunto de dados. Por default, essa predição é de 0,5.
+
+![](images/pred_inicial.png){fig-align="center"}
+
+Podemos ilustrar essa predição inicial adicionando uma linha horizontal no gráfico que representa as probabilidades de uma universidade ser pública pelo que observamos no conjunto de dados.
+
+```{r}
+# Vamos adicionar a coluna "Probabilidade" na base de dados que conterá a probabilidade da
+# universidade ser pública:
+college$Probabilidade = ifelse(college$Private == "Yes", 0, 1)
+
+# Gráfico dos pedidos para ingresso x probabilidade da universidade ser pública baseado no
+# conjunto de dados:
+college %>% ggplot(aes(x = Apps, y = Probabilidade)) + 
+            geom_point(lwd = 5, aes(colour = Private)) + theme_minimal() + 
+            ylab("Probabilidade da Universidade ser Pública") + 
+            geom_hline(yintercept = 0.5, type = 2) + 
+            ggtitle("Pedidos para Ingresso x Probabilidade da Universidade ser Pública") + 
+            xlab("Pedidos para Ingresso") + guides(col = F)
+```
+
+Feita a predição inicial, agora vamos calcular os resíduos e verificar quão boa é essa predição.
+
+```{r}
+college$Residuos = college$Probabilidade-0.5
+college
+```
+
+O próximo passo é construir uma árvore para predizer os resíduos. Assim como a árvore XGB para regressão, a árvore XGB para classificação se inicia com apenas uma folha que leva todos os resíduos.
+
+![](images/Residuos_XGB.png){fig-align="center"}
+
+Agora precisamos calcular o Índice de Similaridade para os resíduos. Porém, como estamos usando XGBoost para classificação, temos uma nova fórmula para ele.
+
+$\text{Índice de Similaridade} = \frac{\left( \sum_{i=1}^n\text{Resíduo}_i\right)^2}{\sum_{i=1}^n\left[ \text{Probabilidade Prévia}_i \times (1 - \text{Probabilidade Prévia}_i)\right] + \lambda}$
+
+Veja que o numerador da fórmula para classificação é igual ao da fórmula para regressão. E assim como para regressão, o denominador contém $\lambda$, o parâmetro de regularização.
+
+Note que, para o nosso exemplo, o numerador do Índice de Similaridade para a folha resultará em 0, pois nós somamos os resíduos antes de elevá-los ao quadrado, o que faz com que eles se cancelem.
+
+$\left( \sum_{i=1}^n \text{Resíduo}_i \right)^2 = (0.5 - 0.5 - 0.5 + 0.5)^2 = 0 \implies \text{Índice de Similaridade = 0}$
+
+![](images/IS1-01.png){fig-align="center"}
+
+Vamos tentar melhorar o Índice dividindo os resíduos em 2 grupos diferentes. Para isso temos que testar todos os possíveis separadores para os dados e escolher o que tiver o maior ganho. Vamos começar com o primeiro: a média entre os 2 menores valores da variável "*Apps*".
+
+```{r}
+ordenados = sort(college$Apps)
+mean(ordenados[1:2])
+```
+
+Assim, os resíduos que possuem Apps \< 1889,5 vão para a esquerda, e os com Apps \> 1889,5 vão para a direita.
+
+![](images/xgb_1.png){fig-align="center"}
+
+Agora vamos calcular o Índice de Similaridade para as duas folhas. Como estamos construindo nossa primeira árvore, a Probabilidade Prévia para todos os resíduos é a predição da folha inicial (0,5). Para simplificar as contas, vamos utilizar o valor padrão de$\lambda$, $\lambda = 0$. Contudo, sabemos da regressão que o $\lambda$ reduz o Índice de Similaridade, o que consequentemente diminui o Ganho e assim torna as folhas mais fáceis de serem podadas, o que ajuda a previnir o sobreajuste.
+
+\$\text{IS}\_{\text{folha da esquerda}} = \frac{(-0.5)^2}{0.5 \times (1-0.5)} = 1 \$
+
+\$\text{IS}\_{\text{folha da esquerda}} = \frac{(-0.5 + 0.5 + 0.5)^2}{[0.5 \times (1-0.5)]+[0.5 \times (1-0.5)]+[0.5 \times (1-0.5)]} = 1 \$
+
+Agora podemos calcular o ganho:
+
+$\text{Ganho} = \text{IS}_{\text{folha da esquerda}} + \text{IS}_{\text{folha da direita}} - \text{IS}_{\text{raiz}} = 1 + 0.33 - 0 = 1.33$
+
+![](images/xgb_2.png){fig-align="center"}
+
+Agora vamos realizar os mesmos cálculos para os próximos 2 separadores: a média entre o segundo e o terceiro valor e a média entre o terceiro e o quarto valor da variável "Apps".
+
+![](images/xgb_3.png){fig-align="center"}
+
+Podemos ver que o maior ganho é tanto o da divisão por "Apps \< 1889,5?" quanto o da divisão por "Apps \< 2739,5?", que deram exatamente iguais. Assim, podemos usar qualquer um dos 2 para ser a raiz da árvore XGB. Vamos ficar com o último.
+
+O próximo passo agora é ramificar a folha da esquerda para darmos continuidade à nossa árvore. Novamente, vamos limitar a profundidade dela em 2.
+
+A árvore XGB fica, então, da seguinte forma:
+
+![](images/xgb_4.png){fig-align="center"}
 
 
+Assim, terminamos de construir a árvore XGB. Porém, é importante saber que o XGBoost possui uma forma de determinar um número mínimo de resíduos permitido em cada folha da árvore. Ele faz isso calculando o **Cover** das folhas.
 
 
+$\text{Cover} = \sum_{i = 1}^n [\text{Probabilidade Prévia}_i \times (1 - \text{Probabilidade Prévia}_i)] $
 
 
+Note que o Cover é definido pelo denominador do Índice de Similaridade sem o $\lambda$ . O valor default é de que o Cover seja no mínimo 1, ou seja, se o Cover de uma folha der menor que 1, o XGBoost não permite que ela exista. Se der maior ou igual a 1, ela pode permanecer na árvore.
+
+
+Calculando o Cover das nossas duas últimas folhas, temos que:
 
 
 
