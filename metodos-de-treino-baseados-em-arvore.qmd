@@ -1,4 +1,3 @@
-```{=html}
 <style>
 .red-text {
   color: red;
@@ -7,7 +6,7 @@
   color: blue;
 }
 </style>
-```
+
 # Métodos de Treino Baseados em Árvore
 
 Neste capítulo será estudado de forma mais aprofundada modelos de treinamento baseados em árvores, os quais são simples para interpretação, como: árvores de decisão e regressão, florestas aleatórias, adaboost, entre outros. O objetivo é entender o funcionamento dos mesmos, assim como os critérios que utilizam para classificarem as amostras.
@@ -38,11 +37,11 @@ No processo de construção de uma árvore de decisão é importante ressaltar q
 
 Dizemos que uma variável é **impura** quando ela não consegue separar bem os dados em uma árvore de decisão. Para calcularmos a impureza de uma variável utilizamos o **indíce Gini**, que varia entre 0 (mais puro possível) e 0,5 (mais impuro possível). Primeiramente calculamos o índice Gini para cada nó da variável, e em seguida obtemos o índice Gini da variável como uma média ponderada. O índice Gini de um nó é obtido por:
 
-Gini(nó) = 1 - $p_{S}^2$ - $p_{N}^2$, onde $p_{S^2}$ é a proporção de "sim" da resposta da variável de interesse e $p_{N}$ a proporção de "não" da resposta da variável de interesse.
+Gini(nó) = 1 -$p_{S}^2$ -$p_{N}^2$, onde$p_{S^2}$ é a proporção de "sim" da resposta da variável de interesse e$p_{N}$ a proporção de "não" da resposta da variável de interesse.
 
 O **índice Gini** da variável é dado pela média do índice Gini para os nós referentes às respostas "Sim" e "Não" ponderada pela proporção dos elementos em cada nó.
 
-Gini(variável) = Gini(nó$_1$) $\times$ $P_1$ + Gini(nó$_2$) $\times$ $P_2$
+Gini(variável) = Gini(nó$_1$)$\times$$P_1$ + Gini(nó$_2$)$\times$$P_2$
 
 ```{r warning=FALSE, message=FALSE}
 base = readRDS("SmallHeart.rds")
@@ -81,15 +80,15 @@ Note que a maioria dos pacientes com doença cardíaca terminaram na folha refer
 
 Primeiramente vamos calcular o índice Gini do nó "Sex = M Sim":
 
-$Gini(Sex = M Sim)$ = 1 - $\left(\frac{14}{50}\right)^2$ - $\left(\frac{36}{50}\right)^2$ = $0,403$
+$Gini(Sex = M Sim)$ = 1 -$\left(\frac{14}{50}\right)^2$ -$\left(\frac{36}{50}\right)^2$ =$0,403$
 
 Agora vamos calcular o índice Gini do nó "Sex = M Não":
 
-$Gini(Sex = M Não)$ = 1 - $\left(\frac{2}{22}\right)^2$ - $\left(\frac{20}{22}\right)^2$ = $0,166$
+$Gini(Sex = M Não)$ = 1 -$\left(\frac{2}{22}\right)^2$ -$\left(\frac{20}{22}\right)^2$ =$0,166$
 
 O índice Gini da variável "Sex = M" é dado pela média do índice Gini dos nós referentes às respostas "Sim" e "Não" ponderada pela frequência dos indivíduos em cada nó.
 
-$Gini(Sex = M)$ = $0,403$ $\times$ $\left(\frac{50}{72}\right)$ + $0,166$ $\times$ $\left(\frac{22}{72}\right)$ = $0,331$
+$Gini(Sex = M)$ =$0,403$$\times$$\left(\frac{50}{72}\right)$ +$0,166$$\times$$\left(\frac{22}{72}\right)$ =$0,331$
 
 Como o índice Gini da variável "Sex = M" ficou mais próximo de 0,5 do que de 0, podemos constatar que ela é uma variável com baixa pureza. Note que se tivéssemos escolhido a variável "Sex = F" o índice Gini obtido seria o mesmo, pois "Sex = F Sim" é equivalente a "Sex = M Não" e "Sex = F Não" é equivalente a "Sex = M Sim". ou seja, as contas seriam as mesmas.
 
@@ -109,19 +108,19 @@ Vamos considerar a variável "ChestPain = Typical". Ela separa os dados da segui
 
 ![](images/Arvore_Chest.png){fig-align="center"}
 
-Note que quase metade dos pacientes que possuem dor no peito têm doença cardíaca. Dos que não sentem a dor no peito, quase $\frac{1}{4}$ apenas possui a doença.
+Note que quase metade dos pacientes que possuem dor no peito têm doença cardíaca. Dos que não sentem a dor no peito, quase$\frac{1}{4}$ apenas possui a doença.
 
 Vamos calcular o índice Gini do nó "ChestPain = Typical Sim":
 
-$Gini(ChestPain = Typical Sim)$ = 1 - $\left(\frac{7}{23}\right)^2$ - $\left(\frac{16}{23}\right)^2$ = $0,423$
+$Gini(ChestPain = Typical Sim)$ = 1 -$\left(\frac{7}{23}\right)^2$ -$\left(\frac{16}{23}\right)^2$ =$0,423$
 
 Agora vamos calcular o índice Gini do nó "ChestPain = Typical Não":
 
-$Gini(ChestPain = Typical Não)$ = 1 - $\left(\frac{9}{49}\right)^2$ - $\left(\frac{40}{49}\right)^2$ = $0,299$
+$Gini(ChestPain = Typical Não)$ = 1 -$\left(\frac{9}{49}\right)^2$ -$\left(\frac{40}{49}\right)^2$ =$0,299$
 
 O índice Gini da variável "ChestPain = Typical" é dado pela média do índice Gini dos nós referentes às respostas "Sim" e "Não" ponderada pela frequência dos indivíduos em cada nó.
 
-$Gini(Sex = M)$ = $0,423$ $\times$ $\left(\frac{23}{72}\right)$ + $0,299$ $\times$ $\left(\frac{49}{72}\right)$ = $0,339$
+$Gini(Sex = M)$ =$0,423$$\times$$\left(\frac{23}{72}\right)$ +$0,299$$\times$$\left(\frac{49}{72}\right)$ =$0,339$
 
 Note que ela obteve um índice Gini um pouco maior do que a variável "Sex = M". Isso indica que a variável "Sex = M" é mais pura do que a variável "ChestPain = Typical".
 
@@ -145,15 +144,15 @@ Note que a maioria dos pacientes que possuem doença cardíaca estão no grupo d
 
 Vamos calcular o índice Gini do nó "Thal = Normal Sim":
 
-$Gini(Thal = Normal Sim)$ = 1 - $\left(\frac{8}{52}\right)^2$ - $\left(\frac{44}{52}\right)^2$ = $0,260$
+$Gini(Thal = Normal Sim)$ = 1 -$\left(\frac{8}{52}\right)^2$ -$\left(\frac{44}{52}\right)^2$ =$0,260$
 
 Agora vamos calcular o índice Gini do nó "Thal = Normal Não":
 
-$Gini(Thal = Normal Não)$ = 1 - $\left(\frac{8}{20}\right)^2$ - $\left(\frac{12}{20}\right)^2$ = $0,480$
+$Gini(Thal = Normal Não)$ = 1 -$\left(\frac{8}{20}\right)^2$ -$\left(\frac{12}{20}\right)^2$ =$0,480$
 
 Então o índice Gini da variável "Thal = Normal" fica da seguinte forma:
 
-$Gini(Thal = Normal)$ = $0,260$ $\times$ $\left(\frac{52}{70}\right)$ + $0,480$ $\times$ $\left(\frac{20}{72}\right)$ = $0,321$
+$Gini(Thal = Normal)$ =$0,260$$\times$$\left(\frac{52}{70}\right)$ +$0,480$$\times$$\left(\frac{20}{72}\right)$ =$0,321$
 
 Agora vamos olhar para a variável "Thal = Fixed". Ela separa os dados da seguinte forma:
 
@@ -161,15 +160,15 @@ Agora vamos olhar para a variável "Thal = Fixed". Ela separa os dados da seguin
 
 Vamos calcular o índice Gini do nó "Thal = Fixed Sim":
 
-$Gini(Thal = Fixed Sim)$ = 1 - $\left(\frac{1}{4}\right)^2$ - $\left(\frac{3}{4}\right)^2$ = $0,375$
+$Gini(Thal = Fixed Sim)$ = 1 -$\left(\frac{1}{4}\right)^2$ -$\left(\frac{3}{4}\right)^2$ =$0,375$
 
 Agora vamos calcular o índice Gini do nó "Thal = Fixed Não":
 
-$Gini(Thal = Fixed Não)$ = 1 - $\left(\frac{15}{68}\right)^2$ - $\left(\frac{53}{68}\right)^2$ = $0,344$
+$Gini(Thal = Fixed Não)$ = 1 -$\left(\frac{15}{68}\right)^2$ -$\left(\frac{53}{68}\right)^2$ =$0,344$
 
 Então o índice Gini da variável "Thal = Fixed" fica da seguinte forma:
 
-$Gini(Thal = Fixed)$ = $0,375$ $\times$ $\left(\frac{4}{72}\right)$ + $0,344$ $\times$ $\left(\frac{68}{72}\right)$ = $0,346$
+$Gini(Thal = Fixed)$ =$0,375$$\times$$\left(\frac{4}{72}\right)$ +$0,344$$\times$$\left(\frac{68}{72}\right)$ =$0,346$
 
 Por último, vamos olhar para a variável "Thal = Reversable".
 
@@ -177,15 +176,15 @@ Por último, vamos olhar para a variável "Thal = Reversable".
 
 Vamos calcular o índice Gini do nó "Thal = Reversable Sim":
 
-$Gini(Thal = Reversable Sim)$ = 1 - $\left(\frac{7}{16}\right)^2$ - $\left(\frac{9}{16}\right)^2$ = $0,492$
+$Gini(Thal = Reversable Sim)$ = 1 -$\left(\frac{7}{16}\right)^2$ -$\left(\frac{9}{16}\right)^2$ =$0,492$
 
 Agora vamos calcular o índice Gini do nó "Thal = Reversable Não":
 
-$Gini(Thal = Reversable Não)$ = 1 - $\left(\frac{9}{56}\right)^2$ - $\left(\frac{47}{56}\right)^2$ = $0,269$
+$Gini(Thal = Reversable Não)$ = 1 -$\left(\frac{9}{56}\right)^2$ -$\left(\frac{47}{56}\right)^2$ =$0,269$
 
 Então o índice Gini da variável "Thal = Reversable" fica da seguinte forma:
 
-$Gini(Thal = Reversable)$ = $0,492$ $\times$ $\left(\frac{16}{72}\right)$ + $0,269$ $\times$ $\left(\frac{56}{72}\right)$ = $0,319$
+$Gini(Thal = Reversable)$ =$0,492$$\times$$\left(\frac{16}{72}\right)$ +$0,269$$\times$$\left(\frac{56}{72}\right)$ =$0,319$
 
 Resumindo, os índices Ginis de todas as variáveis são:
 
@@ -728,7 +727,7 @@ modelo = caret::train(alcohol ~ ., data=wine, method="rf", ntree=50, trControl=c
 modelo
 ```
 
-Note o valor "[mtry]{.red-text}" no modelo. Ele indica a quantidade de váriaveis da base que foram utilizadas para treinar o modelo. Repare que ele calcula a RMSE e $R^2$ para diferentes quantidades de variáveis usadas e utiliza no final a quantidade que possuir menor RMSE, no caso mtry=11. Caso queira fixar o número de variáveis usadas, basta usar o seguinte comando.
+Note o valor "[mtry]{.red-text}" no modelo. Ele indica a quantidade de váriaveis da base que foram utilizadas para treinar o modelo. Repare que ele calcula a RMSE e$R^2$ para diferentes quantidades de variáveis usadas e utiliza no final a quantidade que possuir menor RMSE, no caso mtry=11. Caso queira fixar o número de variáveis usadas, basta usar o seguinte comando.
 
 ```{r warning=FALSE}
 tng = expand.grid(.mtry=7)
@@ -766,13 +765,13 @@ Então temos que "Outlook = Overcast" separa os dados da seguinte forma:
 
 ![](images/AB_Overcast.png){fig-align="center"}
 
-**Gini(Outlook = Overcast)** $= \frac{4}{14} \times \left[1 - (\frac{1}{14})^2 - (\frac{0}{14})^2 \right] + \frac{10}{14} \times \left[ 1 - (\frac{5}{10})^2 - (\frac{5}{10})^2 \right] = 0,357$
+**Gini(Outlook = Overcast)**$= \frac{4}{14} \times \left[1 - (\frac{1}{14})^2 - (\frac{0}{14})^2 \right] + \frac{10}{14} \times \left[ 1 - (\frac{5}{10})^2 - (\frac{5}{10})^2 \right] = 0,357$
 
 Vamos agora olhar para "Outlook = Rain":
 
 ![](images/AB_Rain.png){fig-align="center"}
 
-**Gini(Outlook = Rain)** $= \frac{5}{14} \times \left[1 - (\frac{3}{5})^2 - (\frac{2}{5})^2 \right] + \frac{9}{14} \times \left[ 1 - (\frac{6}{9})^2 - (\frac{3}{9})^2 \right] = 0,457$
+**Gini(Outlook = Rain)**$= \frac{5}{14} \times \left[1 - (\frac{3}{5})^2 - (\frac{2}{5})^2 \right] + \frac{9}{14} \times \left[ 1 - (\frac{6}{9})^2 - (\frac{3}{9})^2 \right] = 0,457$
 
 ![](images/AB_Sunny.png){fig-align="center"}
 
@@ -786,7 +785,7 @@ Temos que "Humidity = High" separa os dados da seguinte forma:
 
 ![](images/AB_High.png){fig-align="center"}
 
-**Gini(Humidity = High)** $= \frac{7}{14} \times \left[1 - (\frac{3}{7})^2 - (\frac{4}{7})^2 \right] + \frac{7}{14} \times \left[ 1 - (\frac{6}{7})^2 - (\frac{1}{7})^2 \right] = 0,367$
+**Gini(Humidity = High)**$= \frac{7}{14} \times \left[1 - (\frac{3}{7})^2 - (\frac{4}{7})^2 \right] + \frac{7}{14} \times \left[ 1 - (\frac{6}{7})^2 - (\frac{1}{7})^2 \right] = 0,367$
 
 Por último, a variável Wind:
 
@@ -796,7 +795,7 @@ golf %>% group_by(Wind, Play) %>% summarise(N=n())
 
 ![](images/AB_Wind.png){fig-align="center"}
 
-**Gini(Wind = Strong)** $= \frac{6}{14} \times \left[1 - (\frac{3}{6})^2 - (\frac{3}{6})^2 \right] + \frac{8}{14} \times \left[ 1 - (\frac{6}{8})^2 - (\frac{2}{8})^2 \right] = 0,429$
+**Gini(Wind = Strong)**$= \frac{6}{14} \times \left[1 - (\frac{3}{6})^2 - (\frac{3}{6})^2 \right] + \frac{8}{14} \times \left[ 1 - (\frac{6}{8})^2 - (\frac{2}{8})^2 \right] = 0,429$
 
 Logo, os índices Gini calculados foram:
 
@@ -821,12 +820,12 @@ O erro total de um toco é calculado pelo número de amostras classificadas erra
 Para esse toco houve 5 amostras classificadas erradas em um total de 14. Logo,
 
 ::: {style="text-align: center;"}
-**Erro Total** $= \frac{5}{14}$
+**Erro Total**$= \frac{5}{14}$
 :::
 
 Dessa forma podemos calcular o *Amount of Say* do toco, que será seu peso na classificação final.
 
-**Amount of Say** $= \frac{1}{2} \times log \left( \frac{1-\frac{5}{14}}{\frac{5}{14}} \right) = 0,29$
+**Amount of Say**$= \frac{1}{2} \times log \left( \frac{1-\frac{5}{14}}{\frac{5}{14}} \right) = 0,29$
 
 Então 0,29 é o seu peso na classificação final.
 
@@ -838,15 +837,15 @@ golf %>% filter(Outlook != "Overcast" & Play != "No")
 
 Então, para rebalancearmos os pesos das amostras classificadas de forma certa e errada, utilizamos as seguintes fórmulas:
 
-**Peso Amostras Erradas** $=$ **Erro Total** $\times$ $e^{Amount of Say}$
+**Peso Amostras Erradas**$=$ **Erro Total**$\times$$e^{Amount of Say}$
 
-**Peso Amostras Corretas** $=$ **Erro Total** $\times$ $e^{-Amount of Say}$
+**Peso Amostras Corretas**$=$ **Erro Total**$\times$$e^{-Amount of Say}$
 
 Assim, para o segundo toco, os pesos serão:
 
-**Peso Amostras Erradas** $= \frac{5}{14} \times e^{0,29} = 0,477$
+**Peso Amostras Erradas**$= \frac{5}{14} \times e^{0,29} = 0,477$
 
-**Peso Amostras Erradas** $= \frac{5}{14} \times e^{-0,29} = 0,267$
+**Peso Amostras Erradas**$= \frac{5}{14} \times e^{-0,29} = 0,267$
 
 Então temos os pesos para as amostras:
 
@@ -1011,7 +1010,7 @@ A primeira coisa a fazer é definir um número máximo de folhas de cada árvore
 
 ![](images/tocoGB.png){fig-align="center"}
 
-Agora, calculamos o **Pseudo-Resíduo**, o erro de previsão de cada indivíduo, da forma **Pseudo-Resíduo** $=$ **Valor Real** $-$ **Valor Predito** para cada observação. Então, por exemplo, o pseudo-resíduo da primeira observação vai ficar $88 - 71.5 = 16,5$.
+Agora, calculamos o **Pseudo-Resíduo**, o erro de previsão de cada indivíduo, da forma **Pseudo-Resíduo**$=$ **Valor Real**$-$ **Valor Predito** para cada observação. Então, por exemplo, o pseudo-resíduo da primeira observação vai ficar$88 - 71.5 = 16,5$.
 
 ```{r}
 ##   Altura      Cor Sexo Peso Ps..Res..1
@@ -1033,9 +1032,9 @@ Note que temos mais observações do que folhas, sendo assim, podemos ter mais q
 
 ![](images/GB2.png){fig-align="center"}
 
-Agora somamos o resultado das duas árvores para classificar na primeira observação, por exemplo, a predição seria $71,5 + 16,5 = 88$. Acertamos exatamente o valor real. Isso é bom? Não. Já vimos como não é bom ter um modelo muito ajustado. Temos pouco viés, mas provavelmente alta variância.
+Agora somamos o resultado das duas árvores para classificar na primeira observação, por exemplo, a predição seria$71,5 + 16,5 = 88$. Acertamos exatamente o valor real. Isso é bom? Não. Já vimos como não é bom ter um modelo muito ajustado. Temos pouco viés, mas provavelmente alta variância.
 
-O Gradiente Boosting lida com esse problema usando uma taxa de aprendizado para reescalar a contribuição da nova árvore. A taxa de aprendizado é um número entre 0 e 1 e deve ser multiplicado ao valor da segunda árvore em diante. Para esse exemplo, vamos adotar uma taxa de 0.1, assim a predição da primeira observação seria $71,5 + (0,1 \times 16,5) = 73,15$. A predição não ficou tão boa, mas é um pouco melhor do que o resultado de apenas uma árvore.
+O Gradiente Boosting lida com esse problema usando uma taxa de aprendizado para reescalar a contribuição da nova árvore. A taxa de aprendizado é um número entre 0 e 1 e deve ser multiplicado ao valor da segunda árvore em diante. Para esse exemplo, vamos adotar uma taxa de 0.1, assim a predição da primeira observação seria$71,5 + (0,1 \times 16,5) = 73,15$. A predição não ficou tão boa, mas é um pouco melhor do que o resultado de apenas uma árvore.
 
 Feito isso, recalculamos os valores do pseudo-resíduo.
 
@@ -1057,7 +1056,7 @@ Agora, utilizando novamente as variáveis explicativas, construímos outra árvo
 
 Note que a estrutura da segunda árvore construída ficou semelhante a primeira. Isso não acontece sempre, mas pode acontecer.
 
-Agora, a classificação da primeira observação ficaria $71.5+(0.116.5)+(0.114.85)=74.635$ um pouco mais perto do verdadeiro valor. Repetimos esse procedimento quantas vezes se queira ou até não ter redução significante dos valores do pseudo-resíduo. Dessa forma temos uma sequência de árvores que caminham em direção ao valor correto em passos pequenos.
+Agora, a classificação da primeira observação ficaria$71.5+(0.116.5)+(0.114.85)=74.635$ um pouco mais perto do verdadeiro valor. Repetimos esse procedimento quantas vezes se queira ou até não ter redução significante dos valores do pseudo-resíduo. Dessa forma temos uma sequência de árvores que caminham em direção ao valor correto em passos pequenos.
 
 É importante notar que todas as árvores devem possuir a mesma taxa de aprendizado.
 
@@ -1111,7 +1110,7 @@ predicao = predict(modelo, teste, n.trees=300)
 postResample(predicao,teste$wage)
 ```
 
-Note que utilizamos 300 árvores. Mas pode ser que não seja necessário essa quantidade de árvores pra alcançar esses valores de $R^2$, RMSE e MAE. Para saber a quantidade ideal de árvores, isto é, quando erro se estabiliza, podemos utilizar a função [gbm.perf()]{.red-text}.
+Note que utilizamos 300 árvores. Mas pode ser que não seja necessário essa quantidade de árvores pra alcançar esses valores de$R^2$, RMSE e MAE. Para saber a quantidade ideal de árvores, isto é, quando erro se estabiliza, podemos utilizar a função [gbm.perf()]{.red-text}.
 
 ```{r}
 gbm.perf(modelo)
@@ -1124,7 +1123,7 @@ predicao2 = predict(modelo, teste, n.trees=50)
 postResample(predicao2,teste$wage)
 ```
 
-Podemos ver que o RMSE e o MAE aumentaram um pouco, porém o $R^2$ foi praticamente o mesmo. E como tivemos um custo computacional muito menor, podemos concluir que esse modelo com 50 árvores acaba sendo melhor do que o com 300.
+Podemos ver que o RMSE e o MAE aumentaram um pouco, porém o$R^2$ foi praticamente o mesmo. E como tivemos um custo computacional muito menor, podemos concluir que esse modelo com 50 árvores acaba sendo melhor do que o com 300.
 
 ### em Classificação
 
@@ -1142,17 +1141,17 @@ Considere a seguinte base de dados
 ## 6 Nao                  14 Azul           Ama
 ```
 
-Queremos predizer se uma pessoa ama o filme Troll 2 baseado em seu gosto por pipoca, idade e cor favorita. Assim como em regressão, começamos o método de Gradiente Boosting usando uma árvore raiz que represente nossa predição inicial para cada observação. Em regressão usamos a média das observações, em classificação vamos usar o log(chances). Olhando na base de dados, podemos dizer que as chances de alguém amar Troll 2 é **chances** $= \frac{\text{quantidade de indivíduos que amaram}}{\text{quantidade de indivíduos que odiaram}} = \frac{4}{2}$, e portanto, o $log(chances) = log(\frac{4}{2}) = 0,6932$ e é isso que colocaremos na folha inicial.
+Queremos predizer se uma pessoa ama o filme Troll 2 baseado em seu gosto por pipoca, idade e cor favorita. Assim como em regressão, começamos o método de Gradiente Boosting usando uma árvore raiz que represente nossa predição inicial para cada observação. Em regressão usamos a média das observações, em classificação vamos usar o log(chances). Olhando na base de dados, podemos dizer que as chances de alguém amar Troll 2 é **chances**$= \frac{\text{quantidade de indivíduos que amaram}}{\text{quantidade de indivíduos que odiaram}} = \frac{4}{2}$, e portanto, o$log(chances) = log(\frac{4}{2}) = 0,6932$ e é isso que colocaremos na folha inicial.
 
 ![](images/tocoGBC.png){fig-align="center"}
 
 O jeito mais fácil de usar o log(chances) para classificar é convertendo em probabilidade, e fazemos isso usando a seguinte função:
 
 ::: {style="text-align: center;"}
-**Probabilidade** $= \frac{e^{log(chances)}}{1 + e^{log(chances)}}$
+**Probabilidade**$= \frac{e^{log(chances)}}{1 + e^{log(chances)}}$
 :::
 
-Sendo assim, a **Probabilidade de alguém amar Troll 2** $= \frac{e^{log(\frac{4}{2})}}{1 + e^{log(\frac{4}{2})}} = \frac{2}{3} = 0,6667$.
+Sendo assim, a **Probabilidade de alguém amar Troll 2**$= \frac{e^{log(\frac{4}{2})}}{1 + e^{log(\frac{4}{2})}} = \frac{2}{3} = 0,6667$.
 
 ![](images/tocoGBC2.png){fig-align="center"}
 
@@ -1207,7 +1206,7 @@ Agora que todas as folhas foram alteradas, podemos somar os resultados escalados
 
 $log(chances) = log(chances) \space anterior + taxa \space de \space aprendizado \space \times \space log(chances)$ obtido na árvore.
 
-Para primeira observação, por exemplo, fica $log(chances) = 0.7 = (0.8 \times 1.4) = 1.82$ e então convertemos em probabilidade $\frac{e^{1.82}}{1 + e^{1.82}} = 0.8606$. Então, note que fizemos progresso, já que o indivíduo em questão ama Troll 2. Antes ele foi classificado corretamente mas com probabilidade 0.7, agora ele foi classificado corretamente mas com probabilidade 0.9.
+Para primeira observação, por exemplo, fica$log(chances) = 0.7 = (0.8 \times 1.4) = 1.82$ e então convertemos em probabilidade$\frac{e^{1.82}}{1 + e^{1.82}} = 0.8606$. Então, note que fizemos progresso, já que o indivíduo em questão ama Troll 2. Antes ele foi classificado corretamente mas com probabilidade 0.7, agora ele foi classificado corretamente mas com probabilidade 0.9.
 
 ```{r}
 ## # A tibble: 6 x 5
@@ -1336,7 +1335,7 @@ Em seguida, calculamos um índice de qualidade ou **Índice de Similaridade**.
 
 $\text{Índice de Similaridade} = \frac{(\sum \text{resíduos})^2}{\text{número de resíduos} + \lambda}$
 
-Onde $\lambda$ (Lambda) é um parâmetro de regularização, o que significa que tem o objetivo de reduzir a sensibilidade das observações individuais, ou seja, reduzir o sobreajuste. Por enquanto, vamos considerar $\lambda = 0$ porque esse é o valor default. Sendo assim, o Índice de similaridade da raiz é $\frac{(18 + 6 - 14 + 5 - 10)^2}{5 + 0} = \frac{5^2}{5} = 5$.
+Onde$\lambda$ (Lambda) é um parâmetro de regularização, o que significa que tem o objetivo de reduzir a sensibilidade das observações individuais, ou seja, reduzir o sobreajuste. Por enquanto, vamos considerar$\lambda = 0$ porque esse é o valor default. Sendo assim, o Índice de similaridade da raiz é$\frac{(18 + 6 - 14 + 5 - 10)^2}{5 + 0} = \frac{5^2}{5} = 5$.
 
 ![](images/xgb3.png){fig-align="center"}
 
@@ -1350,9 +1349,9 @@ Agora, precisamos calcular o ganho dessa ramificação para ver o quanto ela foi
 
 Agora, precisamos calcular o ganho dessa ramificação para ver o quanto ela foi efetiva. O ganho é calculado da seguinte forma:
 
-\$ganho = IS\_{folha \space da \space esquerda} + IS\_{folha \space da \space direita - IS\_{raiz}} \$.
+$ganho = IS\_{folha \space da \space esquerda} + IS\_{folha \space da \space direita - IS\_{raiz}}$.
 
-Assim, o ganho da ramificação $Altura < 1.45$ é \$100 + 56.25 - 5 =151.25 \$. Vamos fazer esse calculo em todas as ramificações possiveis, Isto é, se temos 5 observações com diferentes alturas, vamos ter 4 ramificações possiveis: **Altura\<1.45**, **Altura\<1.55**, **Altura\<1.65** e **Altura\<1.75**.
+Assim, o ganho da ramificação$Altura < 1.45$ é$100 + 56.25 - 5 =151.25$. Vamos fazer esse calculo em todas as ramificações possiveis, Isto é, se temos 5 observações com diferentes alturas, vamos ter 4 ramificações possiveis: **Altura\<1.45**, **Altura\<1.55**, **Altura\<1.65** e **Altura\<1.75**.
 
 ![](images/xgb5.png){fig-align="center"}
 
@@ -1364,13 +1363,13 @@ Nossa árvore XGB final ficou:
 
 ![](images/xgb6.png){fig-align="center"}
 
-Agora, vamos podar nossa árvore. Fazemos isso porque pode ser que algum nó tenha o ganho muito baixo e por isso não vale a pena estar na árvore. Para decidir se vamos tirar algum nó e, se sim, qual, vamos escolher um valor que será chamado de $\gamma$ (gamma). Em seguida, calculamos a diferença entre o ganho associado ao nó e $\gamma$, se essa diferença for negativa, então removemos o nó.
+Agora, vamos podar nossa árvore. Fazemos isso porque pode ser que algum nó tenha o ganho muito baixo e por isso não vale a pena estar na árvore. Para decidir se vamos tirar algum nó e, se sim, qual, vamos escolher um valor que será chamado de$\gamma$ (gamma). Em seguida, calculamos a diferença entre o ganho associado ao nó e$\gamma$, se essa diferença for negativa, então removemos o nó.
 
 $\gamma$ especifica o ganho mínimo necessario para fazer uma divisão. Seu default é 0. Quanto maior, mais conservador é o modelo.
 
-Mesmo quando $\gamma = 0$ isso não previne podas.
+Mesmo quando$\gamma = 0$ isso não previne podas.
 
-Vamos escolher $\gamma = 10$. Começando sempre dos nós mais profundos para a raiz, vamos avaliar a diferença entre o ganho e $\gamma$. No nó mais à direita temos que o ganho é 32.7, portanto a diferença é $32.7 - 10 = 22.7$. Como o resultado é positivo, o nó permanece. No nó à esquerda, a diferença fica $8 - 10 = -2$, e, como o resultado é negativo, retiramos esse nó. Assim, estamos dizendo que o ganho do nó à esquerda não é bom o suficiente pra justificar essa ramificação. Como o nó à direita permaneceu na árvore, não faz sentido calcular essa diferença para o nó raiz.
+Vamos escolher$\gamma = 10$. Começando sempre dos nós mais profundos para a raiz, vamos avaliar a diferença entre o ganho e$\gamma$. No nó mais à direita temos que o ganho é 32.7, portanto a diferença é$32.7 - 10 = 22.7$. Como o resultado é positivo, o nó permanece. No nó à esquerda, a diferença fica$8 - 10 = -2$, e, como o resultado é negativo, retiramos esse nó. Assim, estamos dizendo que o ganho do nó à esquerda não é bom o suficiente pra justificar essa ramificação. Como o nó à direita permaneceu na árvore, não faz sentido calcular essa diferença para o nó raiz.
 
 Mesmo se o valor da diferença der negativo nos nós de cima, se não removermos o de baixo, o de cima não é removido.
 
@@ -1378,29 +1377,31 @@ Com isso, nossa árvore XGB ficou:
 
 ![](images/xgb7.png){fig-align="center"}
 
-Note que se tivéssemos escolhido umNote que se tivéssemos escolhido um $\gamma$ muito alto, por exemplo $\gamma = 570$, toda árvore seria podada. É preciso cuidado.
+Note que se tivéssemos escolhido umNote que se tivéssemos escolhido um$\gamma$ muito alto, por exemplo$\gamma = 570$, toda árvore seria podada. É preciso cuidado.
 
-Agora vamos voltar ao inicio e reconstruir a árvore agora usando $\lambda = 1$ (Lembra do $\lambda$? aquele da fórmula do índicador de similaridade!). Para facilitar a vizualização, vamos omitir os cálculos. A nova árvore XGB ficou:
+Agora vamos voltar ao inicio e reconstruir a árvore agora usando$\lambda = 1$ (Lembra do$\lambda$? aquele da fórmula do índicador de similaridade!). Para facilitar a vizualização, vamos omitir os cálculos. A nova árvore XGB ficou:
 
 ![](images/xgb8.png){fig-align="center"}
 
-Podemos notar que quando $\lambda > 0$, o índice de similaridade é menor. O que significa que se mantivermos o mesmo $\gamma$, a poda será mais extrema. Por outro lado, deixar $\lambda > 0$ ajuda a previnir sobreajustes.
+Podemos notar que quando$\lambda > 0$, o índice de similaridade é menor. O que significa que se mantivermos o mesmo$\gamma$, a poda será mais extrema. Por outro lado, deixar$\lambda > 0$ ajuda a previnir sobreajustes.
 
 Agora que temos árvore final, vamos calcular os valores de saída das folhas.
 
-\$\text{valores de saída} = \frac{\sum \text{soma dos resíduos}}{\text{número de resíduos} + \lambda} \$. Repare que essa fórmula é bem parecida com a do índice de similaridade, mas a soma dos resíduos não está ao quadrado.
+$\text{valores de saída} = \frac{\sum \text{soma dos resíduos}}{\text{número de resíduos} + \lambda}$
 
-Repare que, como $\lambda = 0$, o valor de saida é uma média aritmética simples entre os resíduos. Mas note que se $\lambda > 0$ e a folha tiver apenas uma observação, isso reduzira a sensibilidade dessa observação individual evitando sobreajuste.
+Repare que essa fórmula é bem parecida com a do índice de similaridade, mas a soma dos resíduos não está ao quadrado.
+
+Repare que, como$\lambda = 0$, o valor de saida é uma média aritmética simples entre os resíduos. Mas note que se$\lambda > 0$ e a folha tiver apenas uma observação, isso reduzira a sensibilidade dessa observação individual evitando sobreajuste.
 
 ![](images/xgb9.png){fig-align="center"}
 
 Assim a primeira árvore está completa e, como em Gradient Boosting, fazemos novas predições começando com a predição inicial e somando com o resultado da árvore XGB escalada pela taxa de aprendizado.
 
-O XGBoost chama a taxa de aprendizado de $\epsilon$ (eta) e seu valor default é 0.3, que é o que vamos usar.
+O XGBoost chama a taxa de aprendizado de$\epsilon$ (eta) e seu valor default é 0.3, que é o que vamos usar.
 
 ![](images/xgb10.png){fig-align="center"}
 
-Por exemplo, se a gente pegasse a primeira observação (indivíduo com altura=1.7), seu peso predito seria $predicao \ inicial + \epsilon \ valor\ de\ saida\ da \ árvore\ XGB = 70+0.312=73.6$ que é mais perto do seu peso real (que era 88) do que a predição anterior (70). Assim, com as novas predições, os novos resíduos ficaram:
+Por exemplo, se a gente pegasse a primeira observação (indivíduo com altura=1.7), seu peso predito seria$predicao \ inicial + \epsilon \ valor\ de\ saida\ da \ árvore\ XGB = 70+0.312=73.6$ que é mais perto do seu peso real (que era 88) do que a predição anterior (70). Assim, com as novas predições, os novos resíduos ficaram:
 
 ```{r}
 nova_pred = c(73.6, 73.6, 66.4, 71.5, 66.4)
@@ -1469,7 +1470,7 @@ Os principais argumentos da função xgboost são:
 -   objective: é o tipo de predição que será feita. Para mais informações, veja nesse site.;
 -   verbose: se for 1, que é o default, o xgboost vai imprimir informações de desempenho a cada iteração. Se for 0, não vai imprimir nada.
 
-Para fazer a predição usamos o conhecido predict(). Em seguida, vamos avaliar os resultados do modelo utilizando a função defaultSummary() do pacote caret. Essa função nos retorna os valores do RMSE, $R^2$ e MAE do modelo. Para isso devemos passar como argumento um dataframe onde a primeira coluna são os valores observados dos rótulos do conjunto teste e a segunda coluna são os valores preditos pelo modelo.
+Para fazer a predição usamos o conhecido predict(). Em seguida, vamos avaliar os resultados do modelo utilizando a função defaultSummary() do pacote caret. Essa função nos retorna os valores do RMSE,$R^2$ e MAE do modelo. Para isso devemos passar como argumento um dataframe onde a primeira coluna são os valores observados dos rótulos do conjunto teste e a segunda coluna são os valores preditos pelo modelo.
 
 ```{r}
 predicao = predict(modelo,teste)
@@ -1477,7 +1478,7 @@ predicao = predict(modelo,teste)
 caret::defaultSummary(data.frame(obs = teste_label, pred = predicao))
 ```
 
-Considerando a escala em que os dados se encontram, o valor do RMSE foi um pouco grande. Em contrapartida podemos considerar os valores do MAE e do $R^2$ como sendo razoáveis para o modelo. Em particular, um $R^2$ de aproximadamente 0,7881 nos indica que o modelo tem um poder de explicação de 78,81%.
+Considerando a escala em que os dados se encontram, o valor do RMSE foi um pouco grande. Em contrapartida podemos considerar os valores do MAE e do$R^2$ como sendo razoáveis para o modelo. Em particular, um$R^2$ de aproximadamente 0,7881 nos indica que o modelo tem um poder de explicação de 78,81%.
 
 ### Em Classificação
 
@@ -1536,7 +1537,7 @@ Agora precisamos calcular o Índice de Similaridade para os resíduos. Porém, c
 
 $\text{Índice de Similaridade} = \frac{\left( \sum_{i=1}^n\text{Resíduo}_i\right)^2}{\sum_{i=1}^n\left[ \text{Probabilidade Prévia}_i \times (1 - \text{Probabilidade Prévia}_i)\right] + \lambda}$
 
-Veja que o numerador da fórmula para classificação é igual ao da fórmula para regressão. E assim como para regressão, o denominador contém $\lambda$, o parâmetro de regularização.
+Veja que o numerador da fórmula para classificação é igual ao da fórmula para regressão. E assim como para regressão, o denominador contém$\lambda$, o parâmetro de regularização.
 
 Note que, para o nosso exemplo, o numerador do Índice de Similaridade para a folha resultará em 0, pois nós somamos os resíduos antes de elevá-los ao quadrado, o que faz com que eles se cancelem.
 
@@ -1555,11 +1556,11 @@ Assim, os resíduos que possuem Apps \< 1889,5 vão para a esquerda, e os com Ap
 
 ![](images/xgb_1.png){fig-align="center"}
 
-Agora vamos calcular o Índice de Similaridade para as duas folhas. Como estamos construindo nossa primeira árvore, a Probabilidade Prévia para todos os resíduos é a predição da folha inicial (0,5). Para simplificar as contas, vamos utilizar o valor padrão de$\lambda$, $\lambda = 0$. Contudo, sabemos da regressão que o $\lambda$ reduz o Índice de Similaridade, o que consequentemente diminui o Ganho e assim torna as folhas mais fáceis de serem podadas, o que ajuda a previnir o sobreajuste.
+Agora vamos calcular o Índice de Similaridade para as duas folhas. Como estamos construindo nossa primeira árvore, a Probabilidade Prévia para todos os resíduos é a predição da folha inicial (0,5). Para simplificar as contas, vamos utilizar o valor padrão de$\lambda$,$\lambda = 0$. Contudo, sabemos da regressão que o$\lambda$ reduz o Índice de Similaridade, o que consequentemente diminui o Ganho e assim torna as folhas mais fáceis de serem podadas, o que ajuda a previnir o sobreajuste.
 
-\$\text{IS}\_{\text{folha da esquerda}} = \frac{(-0.5)^2}{0.5 \times (1-0.5)} = 1 \$
+$\text{IS}\_{\text{folha da esquerda}} = \frac{(-0.5)^2}{0.5 \times (1-0.5)} = 1$
 
-\$\text{IS}\_{\text{folha da esquerda}} = \frac{(-0.5 + 0.5 + 0.5)^2}{[0.5 \times (1-0.5)]+[0.5 \times (1-0.5)]+[0.5 \times (1-0.5)]} = 1 \$
+$\text{IS}\_{\text{folha da esquerda}} = \frac{(-0.5 + 0.5 + 0.5)^2}{[0.5 \times (1-0.5)]+[0.5 \times (1-0.5)]+[0.5 \times (1-0.5)]} = 1$
 
 Agora podemos calcular o ganho:
 
@@ -1579,18 +1580,253 @@ A árvore XGB fica, então, da seguinte forma:
 
 ![](images/xgb_4.png){fig-align="center"}
 
-
 Assim, terminamos de construir a árvore XGB. Porém, é importante saber que o XGBoost possui uma forma de determinar um número mínimo de resíduos permitido em cada folha da árvore. Ele faz isso calculando o **Cover** das folhas.
 
+$\text{Cover} = \sum\_{i = 1}\^n \[\text{Probabilidade Prévia}\_i \times (1 - \text{Probabilidade Prévia}\_i)\]$
 
-$\text{Cover} = \sum_{i = 1}^n [\text{Probabilidade Prévia}_i \times (1 - \text{Probabilidade Prévia}_i)] $
-
-
-Note que o Cover é definido pelo denominador do Índice de Similaridade sem o $\lambda$ . O valor default é de que o Cover seja no mínimo 1, ou seja, se o Cover de uma folha der menor que 1, o XGBoost não permite que ela exista. Se der maior ou igual a 1, ela pode permanecer na árvore.
-
+Note que o Cover é definido pelo denominador do Índice de Similaridade sem o$\lambda$ . O valor default é de que o Cover seja no mínimo 1, ou seja, se o Cover de uma folha der menor que 1, o XGBoost não permite que ela exista. Se der maior ou igual a 1, ela pode permanecer na árvore.
 
 Calculando o Cover das nossas duas últimas folhas, temos que:
 
+-   **Cover** da primeira folha:$0.5 \times (1-0.5) = 0.25$
+
+-   **Cover** da segunda folha:$0.5 \times (1-0.5) + 0.5 \times (1-0.5) = 0.5$
+
+![](images/xgb_5.png){fig-align="center"}
+
+Como o Cover de ambas as folhas são menores do que 1, o XGBoost não as permite permanecer na árvore. Logo, vamos removê-las. A árvore fica, então, da seguinte forma:
+
+![](images/xgb_6.png){fig-align="center"}
+
+-   **Cover** da primeira folha:$0.5 \times (1-0.5) + 0.5 \times (1-0.5) + 0.5 \times (1-0.5) = 0.75$
+
+-   **Cover** da segunda folha:$0.5 \times (1-0.5) = 0.25$
+
+![](images/xgb_7.png){fig-align="center"}
+
+Como o *Cover* de ambas as folhas também são menores do que 1, o XGBoost também não as permite permanecer na árvore. Assim, só nos resta a raiz. Mas isso também é um problema, pois o XGBoost requer árvores que sejam maiores do que apenas a raiz. Dessa forma, vamos fixar o valor mínimo para o *Cover* como 0. Assim podemos permanecer com nossa árvore XGB anterior.
+
+![](images/xgb_8.png){fig-align="center"}
+
+*OBS*: Quando estamos utilizando XGBoost para regressão usamos a seguinte fórmula para o Índice de Similaridade:
+
+$\text{Índice de Similaridade} = \frac{(\sum \text{resíduos})^2}{\text{número de resíduos} + \lambda}$
+
+Logo, o Cover de uma folha é dado por:
+
+$\text{Cover} = \text{Número de Resíduos}$
+
+Como o *default* do Cover é 1, isso significa que podemos ter até 1 resíduo por folha. Em outras palavras, o Cover não tem efeito na construção da árvore. Por conta disso ele não foi utilizado anteriormente em XGBoost para regressão.
+
+Agora vamos entrar na parte de como podar a árvore. Ela é feita exatamente como na regressão, nós podamos com base na diferença entre o **Ganho** associado ao nó e$\gamma$. Para esse exemplo, vamos fixar$\gamma = 0.5$.
+
+![](images/xgb_9.png){fig-align="center"}
+
+Como a diferença resultou em um número positivo, não podamos o nó. Logo, não precisamos calcular essa diferença para o nó raiz e nossa árvore permanece a mesma. Note que se tivéssemos fixado, por exemplo,$\gamma = 1.5$, todos os nós seriam podados e nos restaria apenas a predição inicial. É necessário cuidado na escolha do$\gamma$.
+
+Obtida a árvore final, vamos calcular os valores de saída que as folhas terão.
+
+$\text{valores de saída} = \frac{\sum \text{soma dos resíduos}}{\text{número de resíduos} + \lambda}$.
+
+Note que a fórmula é bem parecida com a do Índice de Similaridade, o que muda é apenas o fato de que o numerador não está ao quadrado. Novamente vamos utilizar o valor padrão para $\lambda$, 0.
+
+![](images/xgb_3-01.png){fig-align="center"}
+
+Agora que construímos nossa primeira árvore podemos realizar predições. Assim como no XGBoost para regressão, o XGBoost para classificação faz novas predições começando com a predição inicial e somando com o resultado da árvore XGB escalado pela taxa de aprendizado. Porém, assim como com o Gradiente Boosting para classificação, precisamos converter a predição inicial, que é uma probabilidade, para log(chances). A fórmula para converter probabilidades para chances é dada por:
+
+$log \left( \frac{p}{1-p} \right) = log(chances)$
+
+Então para a predição inicial de 0,5, temos que $log \left( \frac{0.5}{1-0.5} \right) = log(1) = 0$
+
+Agora precisamos adicionar esse valor aos valores de saída da árvore XGB multiplicado pela taxa de aprendizado. Essa taxa é chamada de $\epsilon$ e seu valor padrão é 0,3, o qual iremos usar.
+
+![](images/xgb_11.png){fig-align="center"}
+
+OBS: O que as folhas retornarão após esse cálculo serão os log(chances). É preciso, em seguida, converter para probabilidade também.
+
+Fazendo os cálculos da esquerda para a direita, temos que:
+
+-   Para a 1ª folha, seu valor de saída fica: $0 + 0.3 \times (-2) = -0.6$
+
+-   Para a 2ª folha, seu valor de saída fica: $0 + 0.3 \times 0 = 0$
+
+-   Para a 3ª folha, seu valor de saída fica: $0 + 0.3 \times 2 = 0.6$
+
+Agora para converter esses valores - que são log(chances) - para probabilidade utilizamos a seguinte fórmula:
+
+$\text{Probabilidade} = \frac{e^{\text{log(chances)}}}{1+e^{\text{log(chances})}}$
+
+Fazendo os cálculos, então, da esquerda para a direita:
+
+-   Para a 1ª folha, seu valor de saída fica: $\frac{e^{-0.6}}{1+e^{-0.6}}$
+
+-   Para a 2ª folha, seu valor de saída fica: $\frac{e^{0}}{1+e^{0}}$
+
+-   Para a 3ª folha, seu valor de saída fica: $\frac{e^{0.6}}{1+e^{0.6}}$
+
+Assim, temos as predições da nossa árvore:
+
+![](images/xgb_12.png){fig-align="center"}
+
+Dessa forma podemos obter novos resíduos utilizando a nova árvore.:
+
+
+
+```{r}
+college$Residuos2 = college$Probabilidade-c(0.5,0.35,0.5,0.65)
+college
+```
+
+
+
+Observe que os novos resíduos são menores (ou iguais) do que os anteriores, o que significa que estamos indo na direção correta. O próximo passo agora é construir uma nova árvore para os novos resíduos. Note que agora as probabilidades preditas são diferentes (antes era de 0,5 para todos os elementos), o que tornará os cálculos do Índice de Similaridade e dos Valores de Saída mais interessantes, por exemplo. Com a nova árvore construída fazemos novas predições que nos darão resíduos menores ainda. Então construímos uma nova árvore baseada nos novos resíduos e repetimos o processo. Fazemos isso até que os resíduos se tornem super pequenos ou se atingirmos o número máximo de árvores escolhido.
+
+
+Vamos novamente utilizar o pacote xgboost para construirmos um preditor. Dessa vez iremos construir um classificador e para isso usaremos a base de dados Adult, que se encontra presente no seguinte site: https://archive.ics.uci.edu/ml/index.php. Esse site é um repositório de bases de dados reais, o que torna ele interessante para quem está estudando/trabalhando com aprendizado de máquina.
+
+
+```{r}
+# Lendo a base de dados como um tibble:
+renda = 
+  dplyr::tibble(read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data")))
+str(renda)
+```
+
+
+Essa base possui algumas informações sobre 32.560 indivíduos, tais como: estado civil, raça, sexo, país de origem, entre outras, e a variável de interesse “X..50K”, que indica se o indivíduo tem uma renda maior ou menor/igual do que 50.000 U.M. (unidades monetárias) por ano. Mas antes de começarmos a construção do preditor repare que a base de dados possui variáveis com variância quase-zero.
+
+
+
+```{r}
+library(caret)
+nearZeroVar(renda, saveMetrics = T)
+```
+
+
+Podemos ver que as variáveis “X2174”, “X0” e “United.States” são as que possuem variância quase-zero, o que significa que elas não trarão muita informação ao modelo, pois possuem os mesmos valores ou mesmas classificações para muitos indivíduos.
+
+
+```{r}
+hist(renda$X2174, main = "Histograma da variável X2174", xlab = "Variável X2174", 
+     ylab = "Frequência", col = "blue")
+```
+
+
+
+```{r}
+hist(renda$X0, main = "Histograma da variável X0", xlab = "Variável X0", 
+     ylab = "Frequência", col = "lightblue")
+```
+
+
+
+```{r}
+# Tabela com as observações da variável "United.States":
+# Repare que a grande maioria dos indivíduos (29.169 de 32.560) é proveniente dos Estados Unidos.
+table(renda$United.States)
+```
+
+
+
+Dessa forma, vamos remover essas variáveis do banco de dados.
+
+
+
+```{r}
+# Vetor com todas as variáveis com variância quase-zero:
+nzv = nearZeroVar(renda)
+
+# Removendo do banco de dados:
+renda = renda[, -nzv]
+```
+
+
+
+Agora precisamos nos atentar a um fator importante da função xgboost: ela só aceita bases de dados com **variáveis numéricas**. Isso é um problema para a nossa base pois ela possui variáveis do tipo factor. O que fazer nesse caso? A resposta para essa pergunta é simples: vamos transformar essas variáveis em variáveis dummies.
+
+
+
+```{r}
+# Criando as variáveis dummies:
+dummies = dummyVars(~ X..50K + State.gov + Bachelors + Never.married + Adm.clerical +
+                      Not.in.family + White + Male, data = renda, fullRank = T)
+
+# Aplicando ao modelo:
+Dummies = predict(dummies, newdata = renda)
+
+# Anexando aos dados:
+renda = cbind(renda, Dummies)
+
+# Excluindo as variáveis categóricas do banco de dados:
+renda = dplyr::select(renda, -c(X..50K, State.gov, Bachelors, Never.married, 
+                                Adm.clerical, Not.in.family, White, Male))
+head(renda)
+```
+
+
+
+Note que agora todas as nossas variáveis são numéricas e, portanto, a base está pronta para construirmos o preditor. Como sempre, vamos começar dividindo-a em amostra treino e amostra teste.
+
+
+
+```{r}
+set.seed(11)
+noTreino = createDataPartition(renda$`X..50K >50K`, p = 0.75, list = F)
+
+# Lembre-se que temos que transformar a base em uma matriz:
+renda = as.matrix(renda)
+
+treino = renda[noTreino, -5]
+treino_label = renda[noTreino, 5]
+
+teste = renda[-noTreino, -5]
+teste_label = renda[-noTreino, 5]
+```
+
+
+Agora vamos usar a função xgboost() para criar o modelo.
+
+
+```{r}
+library(xgboost)
+set.seed(11)
+modelo = xgboost(data = treino, label = treino_label, lambda = 1, gamma = 0, eta = 0.3,
+                 nrounds = 500, objective = "binary:logistic", verbose = 0, max_depth = 3)
+
+# Fazendo a predição:
+predicao = predict(modelo, teste)
+head(predicao)
+```
+
+
+
+O modelo retorna probabilidades, então devemos criar um classificador. Vamos criar um bem simples, da seguinte forma:
+
+- Probabilidade acima de 0,5: consideramos que a renda do indivíduo é maior do que 50.000;
+- Probabilidade abaixo de 0,5: consideramos que a renda do indivíduo é menor ou igual a 50.000.
+
+
+
+```{r}
+classificador = as.numeric(predicao>=0.5)
+
+# Utilizando a matriz de confusão para avaliar o modelo:
+
+confusionMatrix(data = as.factor(classificador), reference = as.factor(teste_label), positive = "1")
+```
+
+
+
+Podemos usar o pacote DiagrammeR para visualizarmos as árvores construídas pelo modelo. Para isso basta utilizarmos a função xgb.plot.tree() e no argumento trees escolhermos a(s) árvore(s) desejada(s).
+
+
+
+```{r}
+library(DiagrammeR)
+
+# Visualizando a segunda árvore construída:
+xgb.plot.tree(model = modelo, trees = 2)
+```
 
 
 
