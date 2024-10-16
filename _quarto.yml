@@ -13,8 +13,8 @@ book:
     left: |
       Criação: Maqueise Pinheiro e Thaís Machado. <br>
       Orientação: Douglas Rodrigues (UFF) e Karina Yaginuma (UFF). <br>
-      Colaboradores: Gabriel Miranda e Thiago Augusto.
-  repo-url: https://github.com/CienciaDeDadosUFF/cienciadedadosuff.github.io
+      Colaboradores: Gabriel Miranda, Thiago Augusto, Luana Moreno e Guilherme Ceacero.
+  repo-url: https://github.com/CienciaDeDadosUFF/cienciadedadosuff2.github.io
   downloads: [pdf]
   
   chapters:
@@ -28,6 +28,9 @@ book:
     - cross-valid.qmd
     - comp-func.qmd
     - teste-link.qmd
+    - pre-processamento.qmd
+    - metodos-de-treino-baseados-em-arvore.qmd
+    - outros-metodos.qmd
      #   - references.qmd
 
 
