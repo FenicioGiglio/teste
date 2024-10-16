@@ -1,0 +1,3 @@
+
+
+Neste capítulo estudaremos alguns métodos não baseados em árvores que também são muito importantes e utilizados em machine learning: Support Vector Machine (SVM) e K-Nearest Neighbors (KNN). Veremos como os modelos funcionam na teoria com alguns exemplos e em seguida iremos implementá-los computacionalmente utilizando a linguagem R.
