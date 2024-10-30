@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Pré-processamento – APRENDIZADO DE MÁQUINA COM R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./metodos-de-treino-baseados-em-arvore.html" rel="next">
+<link href="./comp-func.html" rel="prev">
+<link href="./uff-brasao.jpg" rel="icon" type="image/jpeg">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./pre-processamento.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pré-processamento</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">APRENDIZADO DE MÁQUINA COM R</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/CienciaDeDadosUFF/cienciadedadosuff2.github.io" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="./APRENDIZADO-DE-MÁQUINA-COM-R.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bem-vindo</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introdução</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tipos-am.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tipos de Aprendizado de Máquina</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pred.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Predição</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./design-pred.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design de predição</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./erros-amostrais.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Erros Amostrais</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./caret.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Avaliando Preditores - Introdução ao Pacote Caret</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cross-valid.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cross Validation (Validação Cruzada)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./comp-func.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Comparando Funções Preditoras</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pre-processamento.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pré-processamento</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./metodos-de-treino-baseados-em-arvore.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Métodos de Treino Baseados em Árvore</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./outros-metodos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Outros Métodos de Aprendizado de Máquina</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#padronizando-os-dados" id="toc-padronizando-os-dados" class="nav-link active" data-scroll-target="#padronizando-os-dados"><span class="header-section-number">2.1</span> Padronizando os dados</a></li>
+  <li><a href="#padronizando-os-dados-com-a-função-preprocess" id="toc-padronizando-os-dados-com-a-função-preprocess" class="nav-link" data-scroll-target="#padronizando-os-dados-com-a-função-preprocess"><span class="header-section-number">2.2</span> Padronizando os dados com a função <span class="blue-text">PreProcess()</span></a></li>
+  <li><a href="#preprocess-como-argumento-da-função-train" id="toc-preprocess-como-argumento-da-função-train" class="nav-link" data-scroll-target="#preprocess-como-argumento-da-função-train"><span class="header-section-number">2.3</span> preProcess como argumento da função train()</a></li>
+  <li><a href="#tratando-nas" id="toc-tratando-nas" class="nav-link" data-scroll-target="#tratando-nas"><span class="header-section-number">2.4</span> Tratando NA’s</a></li>
+  <li><a href="#método-k-nearest-neighbors-knn" id="toc-método-k-nearest-neighbors-knn" class="nav-link" data-scroll-target="#método-k-nearest-neighbors-knn"><span class="header-section-number">2.5</span> Método <em>k-Nearest Neighbors (knn)</em></a></li>
+  <li><a href="#utilizando-algoritmos-de-machine-learning-com-o-pacote-mlr" id="toc-utilizando-algoritmos-de-machine-learning-com-o-pacote-mlr" class="nav-link" data-scroll-target="#utilizando-algoritmos-de-machine-learning-com-o-pacote-mlr"><span class="header-section-number">2.6</span> Utilizando Algoritmos de <em>Machine Learning</em> com o Pacote mlr</a></li>
+  <li><a href="#variável-dummy" id="toc-variável-dummy" class="nav-link" data-scroll-target="#variável-dummy"><span class="header-section-number">2.7</span> Variável <em>Dummy</em></a></li>
+  <li><a href="#variância-zero-ou-quase-zero" id="toc-variância-zero-ou-quase-zero" class="nav-link" data-scroll-target="#variância-zero-ou-quase-zero"><span class="header-section-number">2.8</span> Variância Zero ou Quase-Zero</a></li>
+  <li><a href="#análise-de-componentes-principais-pca" id="toc-análise-de-componentes-principais-pca" class="nav-link" data-scroll-target="#análise-de-componentes-principais-pca"><span class="header-section-number">2.9</span> Análise de Componentes Principais (<em>PCA</em>)</a></li>
+  <li><a href="#pca-fora-da-função-train" id="toc-pca-fora-da-função-train" class="nav-link" data-scroll-target="#pca-fora-da-função-train"><span class="header-section-number">2.10</span> <em>PCA</em> fora da função train()</a></li>
+  <li><a href="#normalização-dos-dados" id="toc-normalização-dos-dados" class="nav-link" data-scroll-target="#normalização-dos-dados"><span class="header-section-number">2.11</span> Normalização dos Dados</a>
+  <ul class="collapse">
+  <li><a href="#transformação-de-box-cox" id="toc-transformação-de-box-cox" class="nav-link" data-scroll-target="#transformação-de-box-cox"><span class="header-section-number">2.11.1</span> Transformação de Box-Cox</a></li>
+  <li><a href="#outras-transformações" id="toc-outras-transformações" class="nav-link" data-scroll-target="#outras-transformações"><span class="header-section-number">2.11.2</span> Outras Transformações</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/CienciaDeDadosUFF/cienciadedadosuff2.github.io/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pré-processamento</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<style>
+.red-text {
+  color: red;
+}
+.blue-text {
+  color: blue;
+}
+</style>
+<p>Antes de criarmos um modelo de predição, é importante plotarmos as variáveis do nosso modelo antecipadamente para observarmos se há algum comportamento estranho entre elas. Por exemplo, podemos ter uma variável que assuma frequentemente um único valor (possui muito pouca variabilidade), o que não acrescenta informações relevantes ao modelo, ou uma que possua alguns dados faltantes (NA’s). O que podemos fazer nesses casos, que é o que iremos estudar neste capítulo, é realizar alterações em tais variáveis, afim de melhorar/otimizar a nossa predição/classificação. Essa é a ideia de <strong>pré-processar</strong>.</p>
+<section id="padronizando-os-dados" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="padronizando-os-dados"><span class="header-section-number">2.1</span> Padronizando os dados</h2>
+<p>Vamos carregar o banco de dados spam e criar amostras treino e teste.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Carregando pacotes exigidos: ggplot2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Anexando pacote: 'ggplot2'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>O seguinte objeto é mascarado por 'package:kernlab':
+
+    alpha</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Carregando pacotes exigidos: lattice</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(spam)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>noTreino <span class="ot">=</span> <span class="fu">createDataPartition</span>(<span class="at">y =</span> spam<span class="sc">$</span>type, <span class="at">p =</span> <span class="fl">0.75</span>, <span class="at">list =</span> F)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>treino <span class="ot">=</span> spam[noTreino,]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>teste <span class="ot">=</span> spam[<span class="sc">-</span>noTreino,]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Vamos olhar para a variável capitalAve (média de letras maiúsculas por linha):</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(treino<span class="sc">$</span>capitalAve,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Frequência"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Média de Letras Maiúsculas por Linha"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Histograma da Média de Letras Maiúsculas por Linha"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">col=</span><span class="st">"steelblue"</span>, <span class="at">breaks =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pre-processamento_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Podemos notar que muitos elementos estão próximos do 0 e os outros estão muito espalhados. Ou seja, essa variável não está trazendo muita informação para o modelo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(treino<span class="sc">$</span>capitalAve)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.863991</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(treino<span class="sc">$</span>capitalAve)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 27.80173</code></pre>
+</div>
+</div>
+<p>Podemos ver que a média é pequena mas o desvio padrão é muito grande.</p>
+<p>Para que os algoritmos de machine learning não sejam enganados pelo fato de a variável ser altamente variável, vamos realizar um pré-processamento. Vamos padronizar os dados da variável pela amostra treino pegando cada valor dela e subtraindo pela sua média e dividindo pelo seu desvio padrão.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>treinoCapAve <span class="ot">=</span> treino<span class="sc">$</span>capitalAve</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Padronizando a variável:</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>treinoCapAveP <span class="ot">=</span> (treino<span class="sc">$</span>capitalAve<span class="sc">-</span><span class="fu">mean</span>(treinoCapAve))<span class="sc">/</span><span class="fu">sd</span>(treinoCapAve)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Média da variável padronizada:</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(treinoCapAveP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 9.854945e-18</code></pre>
+</div>
+</div>
+<p>Agora temos média 0.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Desvio padrão da variável padronizada:</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(treinoCapAveP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
+</div>
+</div>
+<p>E variância 1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vamos olhar para a variável capitalAve (média de letras maiúsculas por linha):</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(treinoCapAveP, <span class="at">ylab =</span> <span class="st">"Frequência"</span>, <span class="at">xlab =</span> <span class="st">"Média de Letras Maiúsculas por Linha"</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Histograma da Média de Letras Maiúsculas por Linha"</span>,<span class="at">col=</span><span class="st">"steelblue"</span>, <span class="at">breaks =</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pre-processamento_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Agora vamos aplicar a mesma transformação na amostra teste. Uma coisa a ter em mente é que ao aplicar um algoritmo no conjunto de teste, só podemos usar os parâmetros que estimamos no conjunto de treino. <strong>Ou seja, temos que usar a média e o desvio padrão da variável capitalAve do TREINO</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>testeCapAve <span class="ot">=</span> teste<span class="sc">$</span>capitalAve</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando a transformação:</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>testeCapAveP <span class="ot">=</span> (testeCapAve<span class="sc">-</span><span class="fu">mean</span>(treinoCapAve))<span class="sc">/</span><span class="fu">sd</span>(treinoCapAve)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Média da variável transformada do conjunto teste:</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(testeCapAveP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.04713308</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Desvio Padrão da variável transformada do conjunto teste:</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(testeCapAveP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.486708</code></pre>
+</div>
+</div>
+<p>Nesse caso não obtemos média 0 e variância 1, afinal nós utilizamos os parâmetros do treino para a padronização. Mas podemos notar que os valores estão relativamente próximos disso.</p>
+</section>
+<section id="padronizando-os-dados-com-a-função-preprocess" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="padronizando-os-dados-com-a-função-preprocess"><span class="header-section-number">2.2</span> Padronizando os dados com a função <span class="blue-text">PreProcess()</span></h2>
+<p>Podemos realizar o pré-processamento utilizando a função preProcess() do caret. Ela realiza vários tipos de padronizações, mas para utilizarmos a mesma (subtrair a média e dividir pelo desvio padrão) utilizamos o método c(“center”,“scale”).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>padronizacao <span class="ot">=</span> <span class="fu">preProcess</span>(treino, <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"center"</span>,<span class="st">"scale"</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># O comando acima cria um modelo de padronização. Para ter efeito ele deve ser aplicado nos dados com o</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># comando predict().</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>treinoCapAveS <span class="ot">=</span> <span class="fu">predict</span>(padronizacao,treino)<span class="sc">$</span>capitalAve</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Média da variável padronizada:</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(treinoCapAveS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 8.680584e-18</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Desvio padrão da variável padronizada:</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(treinoCapAveS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
+</div>
+</div>
+<p>Note que chegamos à mesma média e variância de quando padronizamos sem o preProcess().</p>
+<p>Agora vamos aplicar essa padronização no conjunto de teste:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>testeCapAveS <span class="ot">=</span> <span class="fu">predict</span>(padronizacao,teste)<span class="sc">$</span>capitalAve</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note que aplicamos o modelo de padronização criado com a amostra treino.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Observe que também encontramos o mesmo valor da média e desvio padrão de quando padronizamos a variável do conjunto teste anteriormente (sem o preProcess()):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(testeCapAveS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.04713308</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(testeCapAveS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.486708</code></pre>
+</div>
+</div>
+<p>Repare que também chegamos à mesma média e variância de quando padronizamos sem o preProcess().</p>
+</section>
+<section id="preprocess-como-argumento-da-função-train" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="preprocess-como-argumento-da-função-train"><span class="header-section-number">2.3</span> preProcess como argumento da função train()</h2>
+<p>Também podemos utilizar o preProcess dentro da função train da seguinte forma:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>modelo <span class="ot">=</span> <span class="fu">train</span>(type<span class="sc">~</span>., <span class="at">data =</span> treino, <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">"center"</span>,<span class="st">"scale"</span>), </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">"glm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A única limitação é que esse método aplica a padronização em <strong>todas</strong> as variáveis numéricas.</p>
+<p><strong>Obs.:</strong> Quando for padronizar uma variável da sua base para depois treinar seu algoritmo, lembre-se que colocar a variável padronizada de volta na sua base.</p>
+</section>
+<section id="tratando-nas" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="tratando-nas"><span class="header-section-number">2.4</span> Tratando NA’s</h2>
+<p>É muito comum encontrar alguns dados faltantes (NA’s) em uma base de dados. E quando você usa essa base para fazer predições, o algoritmo preditor muitas vezes falha, pois eles são criados para não manipular dados ausentes (na maioria dos casos). O mais recomendado a se fazer é descartar esses dados, principalmente se o número de variáveis for muito pequeno. Porém, em alguns casos, podemos tentar substituir os NA’s da amostra por dados de outros elementos que possuam características parecidas.</p>
+<p><strong>Obs:</strong> Este é um procedimento que deve ser feito com muito cuidado, apenas em situações de real necessidade.</p>
+</section>
+<section id="método-k-nearest-neighbors-knn" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="método-k-nearest-neighbors-knn"><span class="header-section-number">2.5</span> Método <em>k-Nearest Neighbors (knn)</em></h2>
+<p>O método k-Nearest Neighbors (knn) consiste em procurar os k vizinhos mais próximos do elemento que possui o dado faltante de uma variável de interesse, calculando a média dos valores observados dessa variável dos k vizinhos e imputando esse valor ao elemento.</p>
+<p>Vamos utilizar novamente a variável capitalAve do banco de dados spam como exemplo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(spam)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13343</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando amostras treino e teste:</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>noTreino <span class="ot">=</span> <span class="fu">createDataPartition</span>(<span class="at">y =</span> spam<span class="sc">$</span>type, <span class="at">p =</span> <span class="fl">0.75</span>, <span class="at">list =</span> F)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>treino <span class="ot">=</span> spam[noTreino,]</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>teste <span class="ot">=</span> spam[<span class="sc">-</span>noTreino,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Originalmente, a variável capitalAve não possui NA’s. Mas para o objetivo de compreendermos como esse método funciona, vamos inserir alguns valores NA’s.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>NAs <span class="ot">=</span> <span class="fu">rbinom</span>(<span class="fu">dim</span>(treino)[<span class="dv">1</span>], <span class="at">size =</span> <span class="dv">1</span>, <span class="at">p =</span> <span class="fl">0.05</span>)<span class="sc">==</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>O que fizemos com a função rbinom() é criar uma amostra de tamanho “dim(treino)[1]” (quantidade de elementos no treino) de uma variável Bernoulli com probabilidade de sucesso = 0,05. Ou seja, o vetor NAs será um vetor do tipo logical, onde será TRUE se o elemento gerado pela rbinom() é “1” (probabilidade de 0,05 de acontecer) e FALSE se é “0” (probabilidade 0,95 de acontecer).</p>
+<p>Para preservar os valores originais, vamos criar uma nova coluna de dados no treino chamada capAve, que será uma réplica da variável capitalAve, mas com os NA’s inseridos em alguns valores.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Anexando pacote: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Os seguintes objetos são mascarados por 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Os seguintes objetos são mascarados por 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando a nova variável capAve com os mesmos valores da capitalAve:</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>treino <span class="ot">=</span> treino <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">capAve =</span> capitalAve)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inserindo os Na's:</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>treino<span class="sc">$</span>capAve[NAs] <span class="ot">=</span> <span class="cn">NA</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Agora podemos aplicar o método KNN para imputar valores aos NA’s, escolhendo essa opção por meio do argumento “method” da função preProcess(). O padrão da função é utilizar k=5.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>imput <span class="ot">=</span> <span class="fu">preProcess</span>(treino, <span class="at">method =</span> <span class="st">"knnImpute"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando o modelo de pré-processamento ao banco de dados treino:</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>treino<span class="sc">$</span>capAve <span class="ot">=</span> <span class="fu">predict</span>(imput,treino)<span class="sc">$</span>capAve</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Olhando para a variável capAve após o pré-processamento:</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(treino<span class="sc">$</span>capAve, <span class="at">n =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] -0.046596612 -0.008173931  0.125003949 -0.052792906 -0.052792906
+ [6] -0.067986558 -0.105588726 -0.083548027  0.122825344 -0.115746121
+[11] -0.047388832 -0.093931771 -0.097100652 -0.021245565  0.850451334
+[16] -0.115519772 -0.044418006 -0.015445381 -0.120867259  0.001785409</code></pre>
+</div>
+</div>
+<p>Note que além de ter imputado valores aos NA’s, o comando knnImpute também padronizou os dados.</p>
+<p><strong>Obs:</strong> O método knnImpute só resolve os NA’s quando os dados faltantes são NUMÉRICOS.</p>
+<p>E se quiséssemos aplicar o método de imputar valores aos NA’s em <strong>todo</strong> o conjunto de dados, e não só em apenas 1 variável? Também podemos fazer isso utilizando a função preProcess().</p>
+<p>Vamos utilizar a base de dados “airquality”, já disponível no R, como exemplo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>base <span class="ot">=</span> airquality</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(base, <span class="at">n =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Ozone Solar.R Wind Temp Month Day
+1     41     190  7.4   67     5   1
+2     36     118  8.0   72     5   2
+3     12     149 12.6   74     5   3
+4     18     313 11.5   62     5   4
+5     NA      NA 14.3   56     5   5
+6     28      NA 14.9   66     5   6
+7     23     299  8.6   65     5   7
+8     19      99 13.8   59     5   8
+9      8      19 20.1   61     5   9
+10    NA     194  8.6   69     5  10
+11     7      NA  6.9   74     5  11
+12    16     256  9.7   69     5  12
+13    11     290  9.2   66     5  13
+14    14     274 10.9   68     5  14
+15    18      65 13.2   58     5  15</code></pre>
+</div>
+</div>
+<p>Note que essa base possui alguns valores NA’s em algumas variáveis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Realizando o método KNN para imputar valores aos NA's:</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>imput <span class="ot">=</span> <span class="fu">preProcess</span>(base, <span class="at">method =</span> <span class="st">"knnImpute"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando o modelo em toda a base de dados:</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>nova_base <span class="ot">=</span> <span class="fu">predict</span>(imput, base)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Vamos olhar para a nova base:</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(nova_base, <span class="at">n =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Ozone      Solar.R        Wind       Temp     Month        Day
+1  -0.03423409  0.045176154 -0.72594816 -1.1497140 -1.407294 -1.6700195
+2  -0.18580489 -0.754304874 -0.55563883 -0.6214670 -1.407294 -1.5572102
+3  -0.91334473 -0.410083876  0.75006604 -0.4101682 -1.407294 -1.4444009
+4  -0.73145977  1.410956244  0.43783226 -1.6779609 -1.407294 -1.3315917
+5  -0.81027658 -0.221317522  1.23260914 -2.3118573 -1.407294 -1.2187824
+6  -0.42831817  0.007422883  1.40291847 -1.2553634 -1.407294 -1.1059732
+7  -0.57988897  1.255501599 -0.38532950 -1.3610128 -1.407294 -0.9931639
+8  -0.70114561 -0.965279034  1.09068470 -1.9949091 -1.407294 -0.8803546
+9  -1.03460136 -1.853591288  2.87893266 -1.7836103 -1.407294 -0.7675454
+10 -0.64051729  0.089591767 -0.38532950 -0.9384152 -1.407294 -0.6547361
+11 -1.06491552  0.749163615 -0.86787260 -0.4101682 -1.407294 -0.5419268
+12 -0.79208809  0.778033763 -0.07309573 -0.9384152 -1.407294 -0.4291176
+13 -0.94365889  1.155566471 -0.21502017 -1.2553634 -1.407294 -0.3163083
+14 -0.85271641  0.977904020  0.26752293 -1.0440646 -1.407294 -0.2034991
+15 -0.73145977 -1.342811742  0.92037537 -2.1005585 -1.407294 -0.0906898</code></pre>
+</div>
+</div>
+<p>Note que ela não possui mais NA’s e todas as variáveis foram padronizadas.</p>
+</section>
+<section id="utilizando-algoritmos-de-machine-learning-com-o-pacote-mlr" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="utilizando-algoritmos-de-machine-learning-com-o-pacote-mlr"><span class="header-section-number">2.6</span> Utilizando Algoritmos de <em>Machine Learning</em> com o Pacote mlr</h2>
+<p>O pacote <span class="red-text"><strong>mlr</strong></span> fornece vários métodos de imputação para dados faltantes. Alguns desses métodos possuem técnicas padrões como, por exemplo, imputação por uma constante (uma constante fixa, a média, a mediana ou a moda) ou números aleatórios (da distribuição empírica dos dados em consideração ou de uma determinada família de distribuições). Para mais informações sobre como utilizar essas imputações padrões, consulte https://mlr.mlr-org.com/reference/imputations.html.</p>
+<p>Entretanto, a principal vantagem desse pacote - que é o que abordaremos nessa seção - é a possibilidade de imputação dos valores faltantes de uma variável por meio de predições de um algoritmo de machine learning, utilizando como base as outras variáveis. Ou seja, além de aceitar valores faltantes de variáveis numéricas para a imputação, ele também aceita de variáveis categóricas.</p>
+<p>Podemos observar todos os algoritmos de machine learning possíveis de serem utilizados nesse pacote através da função listLearners().</p>
+<ul>
+<li>Para um problema de imputação de NA’s de variáveis numéricas temos os seguintes métodos:</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Carregando pacotes exigidos: ParamHelpers</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Anexando pacote: 'mlr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>O seguinte objeto é mascarado por 'package:caret':
+
+    train</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">listLearners</span>(<span class="st">"regr"</span>, <span class="at">properties =</span> <span class="st">"missings"</span>)[<span class="st">"class"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">regr.cforest</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regr.ctree</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regr.cubist</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regr.featureless</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regr.gbm</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regr.h2o.deeplearning</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regr.h2o.gbm</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regr.h2o.glm</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regr.h2o.randomForest</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regr.rpart</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regr.xgboost</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Para um problema de imputação de NA’s de variáveis categóricas temos os seguintes métodos:</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">listLearners</span>(<span class="st">"classif"</span>, <span class="at">properties =</span> <span class="st">"missings"</span>)[<span class="st">"class"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">classif.boosting</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.C50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.cforest</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.ctree</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.featureless</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.gbm</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.h2o.deeplearning</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.h2o.gbm</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.h2o.glm</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.h2o.randomForest</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.J48</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.JRip</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.naiveBayes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.OneR</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.PART</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">classif.rpart</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">classif.xgboost</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Vamos utilizar o banco de dados “heart” para realizarmos a imputação de dados faltantes categóricos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>heart <span class="ot">=</span> <span class="fu">read_csv</span>(<span class="st">"Heart.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 297 Columns: 15
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (3): ChestPain, Thal, HeartDisease
+dbl (12): X1, Age, Sex, RestBP, Chol, Fbs, RestECG, MaxHR, ExAng, Oldpeak, S...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificando se a base "heart" possui valores NA's em alguma variável:</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(heart, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">any</span>(<span class="fu">is.na</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          X1          Age          Sex    ChestPain       RestBP         Chol 
+       FALSE        FALSE        FALSE        FALSE        FALSE        FALSE 
+         Fbs      RestECG        MaxHR        ExAng      Oldpeak        Slope 
+       FALSE        FALSE        FALSE        FALSE        FALSE        FALSE 
+          Ca         Thal HeartDisease 
+       FALSE        FALSE        FALSE </code></pre>
+</div>
+</div>
+<p>Note que a base não possui dados faltantes. Para fins didáticos, vamos inserir alguns na variável “Thal”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um novo banco de dados que possuirá NA's:</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>new.heart <span class="ot">=</span> <span class="fu">as.data.frame</span>(heart)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">133</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um vetor do tipo *logical*, onde será TRUE se o elemento gerado pela rbinom() é "1"</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="co"># (probabilidade de 0,1 de acontecer):</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>NAs <span class="ot">=</span> <span class="fu">rbinom</span>(<span class="fu">dim</span>(new.heart)[<span class="dv">1</span>], <span class="at">size =</span> <span class="dv">1</span>, <span class="at">p =</span> <span class="fl">0.1</span>)<span class="sc">==</span><span class="dv">1</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Inserindo os NA's na variável Thal:</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>new.heart<span class="sc">$</span>Thal[NAs] <span class="ot">=</span> <span class="cn">NA</span> </span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>new.heart<span class="sc">$</span>Thal</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "fixed"      "normal"     "reversable" "normal"     "normal"    
+  [6] "normal"     "normal"     "normal"     "reversable" "reversable"
+ [11] "fixed"      "normal"     "fixed"      "reversable" "reversable"
+ [16] "normal"     "reversable" "normal"     "normal"     "normal"    
+ [21] NA           "normal"     "normal"     "reversable" "reversable"
+ [26] "normal"     "normal"     "normal"     "normal"     NA          
+ [31] "normal"     "reversable" "normal"     "reversable" "normal"    
+ [36] "normal"     "reversable" "fixed"      "reversable" "normal"    
+ [41] "reversable" "reversable" "normal"     "normal"     "normal"    
+ [46] "reversable" "normal"     "reversable" "normal"     "normal"    
+ [51] "normal"     "reversable" "normal"     "normal"     "reversable"
+ [56] NA           "reversable" "reversable" "normal"     "normal"    
+ [61] NA           "normal"     "reversable" "normal"     NA          
+ [66] "reversable" "normal"     "reversable" "reversable" "normal"    
+ [71] "normal"     "reversable" "reversable" "fixed"      NA          
+ [76] "normal"     "reversable" "normal"     "normal"     NA          
+ [81] "normal"     "normal"     "normal"     "reversable" "normal"    
+ [86] "normal"     "normal"     "normal"     "normal"     "normal"    
+ [91] "reversable" "reversable" "normal"     "normal"     "reversable"
+ [96] "reversable" "reversable" "normal"     "normal"     "normal"    
+[101] "normal"     NA           "normal"     "reversable" "reversable"
+[106] "reversable" "reversable" "reversable" "reversable" "reversable"
+[111] "normal"     "fixed"      "reversable" "reversable" "fixed"     
+[116] "normal"     "normal"     "reversable" "reversable" "reversable"
+[121] "reversable" "normal"     NA           "normal"     NA          
+[126] "reversable" "reversable" "normal"     "normal"     "reversable"
+[131] "reversable" "normal"     "normal"     "normal"     "normal"    
+[136] NA           "reversable" "reversable" "normal"     "normal"    
+[141] "reversable" "normal"     "reversable" "reversable" "normal"    
+[146] "reversable" "normal"     "normal"     NA           "reversable"
+[151] "normal"     "reversable" "reversable" "normal"     "normal"    
+[156] "reversable" "reversable" NA           "reversable" "reversable"
+[161] NA           "normal"     "normal"     "normal"     "reversable"
+[166] "normal"     NA           "normal"     "reversable" "reversable"
+[171] "normal"     "normal"     "fixed"      "reversable" "reversable"
+[176] "fixed"      "normal"     "normal"     "reversable" "reversable"
+[181] "normal"     "reversable" "normal"     "normal"     "reversable"
+[186] "fixed"      "reversable" "reversable" "normal"     "reversable"
+[191] "normal"     "normal"     "normal"     "normal"     "normal"    
+[196] "normal"     "normal"     "normal"     "normal"     NA          
+[201] "reversable" NA           "reversable" NA           "reversable"
+[206] "normal"     "normal"     "normal"     "reversable" "normal"    
+[211] "reversable" "normal"     "reversable" "normal"     "normal"    
+[216] "normal"     "normal"     "normal"     "normal"     "normal"    
+[221] "reversable" "normal"     "normal"     "normal"     "normal"    
+[226] "normal"     "normal"     "normal"     "normal"     NA          
+[231] "normal"     "normal"     "normal"     "reversable" "reversable"
+[236] "normal"     "normal"     "normal"     "normal"     "normal"    
+[241] "normal"     "normal"     "normal"     "reversable" "normal"    
+[246] "reversable" "normal"     "fixed"      "reversable" "reversable"
+[251] "normal"     "normal"     "normal"     "normal"     "normal"    
+[256] "normal"     "reversable" "normal"     "normal"     "normal"    
+[261] "normal"     "normal"     "fixed"      "fixed"      "reversable"
+[266] "normal"     "reversable" "fixed"      "reversable" "normal"    
+[271] "normal"     "reversable" "normal"     "normal"     "normal"    
+[276] "normal"     "reversable" "normal"     "reversable" NA          
+[281] "reversable" "fixed"      "fixed"      "reversable" "normal"    
+[286] "reversable" "normal"     "fixed"      "reversable" "normal"    
+[291] NA           "fixed"      NA           "reversable" "reversable"
+[296] "reversable" "normal"    </code></pre>
+</div>
+</div>
+<p>Agora vamos imputar categorias aos dados faltantes da variável Thal. Iremos fazer isso através da função impute(). O único problema é que possuímos variáveis do tipo character na base de dados, e a função não aceita esta classe nos dados.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(new.heart)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   297 obs. of  15 variables:
+ $ X1          : num  1 2 3 4 5 6 7 8 9 10 ...
+ $ Age         : num  63 67 67 37 41 56 62 57 63 53 ...
+ $ Sex         : num  1 1 1 1 0 1 0 0 1 1 ...
+ $ ChestPain   : chr  "typical" "asymptomatic" "asymptomatic" "nonanginal" ...
+ $ RestBP      : num  145 160 120 130 130 120 140 120 130 140 ...
+ $ Chol        : num  233 286 229 250 204 236 268 354 254 203 ...
+ $ Fbs         : num  1 0 0 0 0 0 0 0 0 1 ...
+ $ RestECG     : num  2 2 2 0 2 0 2 0 2 2 ...
+ $ MaxHR       : num  150 108 129 187 172 178 160 163 147 155 ...
+ $ ExAng       : num  0 1 1 0 0 0 0 1 0 1 ...
+ $ Oldpeak     : num  2.3 1.5 2.6 3.5 1.4 0.8 3.6 0.6 1.4 3.1 ...
+ $ Slope       : num  3 2 2 3 1 1 3 1 2 3 ...
+ $ Ca          : num  0 3 2 0 0 0 2 0 1 0 ...
+ $ Thal        : chr  "fixed" "normal" "reversable" "normal" ...
+ $ HeartDisease: chr  "No" "Yes" "Yes" "No" ...</code></pre>
+</div>
+</div>
+<p>Vamos transformar essas categorias em fatores.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>new.heart <span class="ot">=</span> <span class="fu">mutate_if</span>(new.heart, is.character, as.factor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Vamos separar os dados em treino e teste.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">133</span>)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>noTreino <span class="ot">=</span> caret<span class="sc">::</span><span class="fu">createDataPartition</span>(<span class="at">y =</span> new.heart<span class="sc">$</span>HeartDisease, <span class="at">p =</span> <span class="fl">0.75</span>,</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">list =</span> F)</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>treino <span class="ot">=</span> new.heart[noTreino,]</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>teste <span class="ot">=</span> new.heart[<span class="sc">-</span>noTreino,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Agora vamos imputar os dados no conjunto treino com a função impute().</p>
+<p>Para isso passamos como argumento:</p>
+<ul>
+<li><p>A base de dados que possui os valores faltantes;</p></li>
+<li><p>A variável resposta do modelo, ou seja, a variável de interesse para predição. No nosso exemplo essa variável é a “HeartDisease”, que indica se uma pessoa possui uma doença cardíaca;</p></li>
+<li><p>Lista contendo o método de imputação para cada coluna do banco de dados. Como apenas temos NA’s na variável “Thal”, a lista só possuirá essa variável, seguida do método de imputação que desejamos para ela. Vamos utilizar o método de árvores de decisão (“rpart”).</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>treino <span class="ot">=</span> mlr<span class="sc">::</span><span class="fu">impute</span>(treino, <span class="at">target =</span> <span class="st">"HeartDisease"</span>,</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">cols =</span> <span class="fu">list</span>(<span class="at">Thal =</span> <span class="fu">imputeLearner</span>(<span class="st">"classif.rpart"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Essa função retorna uma lista de tamanho 2, onde primeiro se encontra a base de dados após a imputação dos valores e em seguida detalhes do método utilizado.</p>
+<p>Vamos olhar para a variável após a imputação dos dados:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>treino<span class="sc">$</span>data[,<span class="st">"Thal"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] normal     normal     normal     normal     normal     normal    
+  [7] reversable reversable fixed      normal     fixed      reversable
+ [13] normal     normal     normal     reversable reversable reversable
+ [19] normal     normal     normal     normal     reversable normal    
+ [25] normal     reversable reversable reversable normal     reversable
+ [31] reversable normal     reversable normal     normal     normal    
+ [37] normal     reversable normal     normal     reversable reversable
+ [43] reversable reversable normal     normal     reversable normal    
+ [49] reversable reversable reversable normal     normal     reversable
+ [55] reversable fixed      reversable normal     reversable normal    
+ [61] normal     reversable normal     normal     normal     reversable
+ [67] normal     normal     normal     normal     normal     reversable
+ [73] reversable normal     reversable reversable reversable normal    
+ [79] normal     normal     reversable reversable reversable reversable
+ [85] reversable reversable fixed      normal     reversable reversable
+ [91] normal     reversable normal     normal     reversable reversable
+ [97] normal     normal     normal     normal     normal     reversable
+[103] reversable normal     reversable normal     normal     reversable
+[109] normal     normal     normal     reversable reversable normal    
+[115] normal     reversable reversable normal     normal     normal    
+[121] reversable reversable normal     reversable reversable normal    
+[127] normal     reversable reversable fixed      normal     normal    
+[133] reversable reversable reversable normal     normal     fixed     
+[139] reversable reversable normal     reversable normal     normal    
+[145] normal     normal     normal     normal     reversable reversable
+[151] reversable reversable reversable reversable normal     normal    
+[157] reversable reversable normal     normal     normal     normal    
+[163] normal     reversable normal     normal     normal     normal    
+[169] normal     normal     normal     normal     normal     normal    
+[175] normal     reversable reversable normal     normal     normal    
+[181] normal     normal     reversable reversable normal     fixed     
+[187] reversable normal     normal     normal     normal     normal    
+[193] reversable normal     normal     normal     fixed      fixed     
+[199] reversable normal     reversable fixed      reversable normal    
+[205] reversable normal     normal     normal     normal     reversable
+[211] normal     reversable reversable fixed      fixed      reversable
+[217] normal     normal     fixed      reversable normal     normal    
+[223] normal    
+Levels: fixed normal reversable</code></pre>
+</div>
+</div>
+<p>Para implementarmos esse algoritmo no conjunto de dados teste basta utilizarmos a função reimpute() que implementaremos o mesmo método com os mesmos critérios criados no conjuno treino. Basta passar os seguintes argumentos:</p>
+<ul>
+<li><p>A base de dados que possui os valores faltantes;</p></li>
+<li><p>O mesmo método utilizado no treino.</p></li>
+</ul>
+<p>A função retorna a base de dados com os valores imputados.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>teste <span class="ot">=</span> <span class="fu">reimpute</span>(teste, treino<span class="sc">$</span>desc)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>teste<span class="sc">$</span>Thal</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] fixed      reversable reversable reversable normal     normal    
+ [7] normal     reversable normal     normal     fixed      normal    
+[13] normal     reversable normal     normal     normal     reversable
+[19] normal     normal     normal     normal     normal     reversable
+[25] normal     reversable reversable fixed      normal     reversable
+[31] reversable normal     reversable reversable normal     normal    
+[37] reversable reversable normal     reversable reversable reversable
+[43] reversable normal     normal     fixed      normal     reversable
+[49] normal     normal     normal     normal     normal     reversable
+[55] normal     normal     normal     normal     normal     normal    
+[61] normal     normal     reversable normal     normal     normal    
+[67] normal     normal     reversable normal     fixed      reversable
+[73] reversable reversable
+Levels: fixed normal reversable</code></pre>
+</div>
+</div>
+</section>
+<section id="variável-dummy" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="variável-dummy"><span class="header-section-number">2.7</span> Variável <em>Dummy</em></h2>
+<p>As variáveis dummies ou variáveis indicadoras são formas de agregar informações qualitativas em modelos estatísticos. Ela atribui 1 se o elemento possui determinada característica, ou 0 caso ele não possua. Esse tipo de transformação é importante para modelos de regressão pois ela torna possível trabalhar com variáveis qualitativas.</p>
+<p>Vamos utilizar o banco de dados Wage, do pacote ISLR. Este banco possui informações sobre 3000 trabalhadores do sexo masculino de uma região dos EUA, como por exemplo idade (age), tipo de trabalho (jobclass), salário (wage), entre outras. Nosso objetivo é tentar prever o salário do indivíduo em função das outras variáveis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ISLR)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wage)</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Wage)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       year age           maritl     race       education             region
+231655 2006  18 1. Never Married 1. White    1. &lt; HS Grad 2. Middle Atlantic
+86582  2004  24 1. Never Married 1. White 4. College Grad 2. Middle Atlantic
+161300 2003  45       2. Married 1. White 3. Some College 2. Middle Atlantic
+155159 2003  43       2. Married 3. Asian 4. College Grad 2. Middle Atlantic
+11443  2005  50      4. Divorced 1. White      2. HS Grad 2. Middle Atlantic
+376662 2008  54       2. Married 1. White 4. College Grad 2. Middle Atlantic
+             jobclass         health health_ins  logwage      wage
+231655  1. Industrial      1. &lt;=Good      2. No 4.318063  75.04315
+86582  2. Information 2. &gt;=Very Good      2. No 4.255273  70.47602
+161300  1. Industrial      1. &lt;=Good     1. Yes 4.875061 130.98218
+155159 2. Information 2. &gt;=Very Good     1. Yes 5.041393 154.68529
+11443  2. Information      1. &lt;=Good     1. Yes 4.318063  75.04315
+376662 2. Information 2. &gt;=Very Good     1. Yes 4.845098 127.11574</code></pre>
+</div>
+</div>
+<p>Vamos olhar para 2 variáveis: jobclass (tipo de trabalho) e health_ins (indica se o trabalhador possui plano de saúde).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>Wage <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>jobclass)) <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>jobclass)) <span class="sc">+</span></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Frequência"</span>) <span class="sc">+</span> <span class="fu">guides</span>(<span class="at">fill=</span>F) <span class="sc">+</span> <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Gráfico de Barras para o Tipo de Trabalho"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: The `&lt;scale&gt;` argument of `guides()` cannot be `FALSE`. Use "none" instead as
+of ggplot2 3.3.4.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pre-processamento_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>Wage <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>health_ins)) <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>health_ins)) <span class="sc">+</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Frequência"</span>) <span class="sc">+</span> <span class="fu">guides</span>(<span class="at">fill=</span>F) <span class="sc">+</span> <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Gráfico de Barras para o Plano de Saúde"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pre-processamento_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Vamos transformar essas 2 variáveis em dummies por meio da função dummyVars().</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>dummies <span class="ot">=</span> <span class="fu">dummyVars</span>(wage<span class="sc">~</span>jobclass<span class="sc">+</span>health_ins, <span class="at">data =</span> Wage)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando ao modelo:</span></span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>Dummies <span class="ot">=</span> <span class="fu">predict</span>(dummies, <span class="at">newdata =</span> Wage)</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Dummies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       jobclass.1. Industrial jobclass.2. Information health_ins.1. Yes
+231655                      1                       0                 0
+86582                       0                       1                 0
+161300                      1                       0                 1
+155159                      0                       1                 1
+11443                       0                       1                 1
+376662                      0                       1                 1
+       health_ins.2. No
+231655                1
+86582                 1
+161300                0
+155159                0
+11443                 0
+376662                0</code></pre>
+</div>
+</div>
+<p>Note que ele transforma cada categoria numa variável dummy. Ou seja, como temos 2 categorias para jobclass, cada uma delas vira uma variável dummy. Então se para um indivíduo temos um “1” na categoria “jobclass=industrial”, isso implica que terá um “0” na categoria “jobclass=information”, pois ou o indivíduo tem um tipo de trabalho, ou tem outro. O mesmo vale para as categorias de plano de saúde.</p>
+<p>Observe também que esse novo modelo criado é uma matriz:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(Dummies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "matrix" "array" </code></pre>
+</div>
+</div>
+<p>Vamos anexar esse novo objeto aos dados:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>Wage_dummy <span class="ot">=</span> <span class="fu">cbind</span>(Wage, Dummies)</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Wage_dummy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       year age           maritl     race       education             region
+231655 2006  18 1. Never Married 1. White    1. &lt; HS Grad 2. Middle Atlantic
+86582  2004  24 1. Never Married 1. White 4. College Grad 2. Middle Atlantic
+161300 2003  45       2. Married 1. White 3. Some College 2. Middle Atlantic
+155159 2003  43       2. Married 3. Asian 4. College Grad 2. Middle Atlantic
+11443  2005  50      4. Divorced 1. White      2. HS Grad 2. Middle Atlantic
+376662 2008  54       2. Married 1. White 4. College Grad 2. Middle Atlantic
+             jobclass         health health_ins  logwage      wage
+231655  1. Industrial      1. &lt;=Good      2. No 4.318063  75.04315
+86582  2. Information 2. &gt;=Very Good      2. No 4.255273  70.47602
+161300  1. Industrial      1. &lt;=Good     1. Yes 4.875061 130.98218
+155159 2. Information 2. &gt;=Very Good     1. Yes 5.041393 154.68529
+11443  2. Information      1. &lt;=Good     1. Yes 4.318063  75.04315
+376662 2. Information 2. &gt;=Very Good     1. Yes 4.845098 127.11574
+       jobclass.1. Industrial jobclass.2. Information health_ins.1. Yes
+231655                      1                       0                 0
+86582                       0                       1                 0
+161300                      1                       0                 1
+155159                      0                       1                 1
+11443                       0                       1                 1
+376662                      0                       1                 1
+       health_ins.2. No
+231655                1
+86582                 1
+161300                0
+155159                0
+11443                 0
+376662                0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Removendo as variáveis categóricas do banco de dados completo (opcional):</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>Wage_dummy <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Wage_dummy, <span class="sc">-</span><span class="fu">c</span>(jobclass,health_ins))</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Wage_dummy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       year age           maritl     race       education             region
+231655 2006  18 1. Never Married 1. White    1. &lt; HS Grad 2. Middle Atlantic
+86582  2004  24 1. Never Married 1. White 4. College Grad 2. Middle Atlantic
+161300 2003  45       2. Married 1. White 3. Some College 2. Middle Atlantic
+155159 2003  43       2. Married 3. Asian 4. College Grad 2. Middle Atlantic
+11443  2005  50      4. Divorced 1. White      2. HS Grad 2. Middle Atlantic
+376662 2008  54       2. Married 1. White 4. College Grad 2. Middle Atlantic
+               health  logwage      wage jobclass.1. Industrial
+231655      1. &lt;=Good 4.318063  75.04315                      1
+86582  2. &gt;=Very Good 4.255273  70.47602                      0
+161300      1. &lt;=Good 4.875061 130.98218                      1
+155159 2. &gt;=Very Good 5.041393 154.68529                      0
+11443       1. &lt;=Good 4.318063  75.04315                      0
+376662 2. &gt;=Very Good 4.845098 127.11574                      0
+       jobclass.2. Information health_ins.1. Yes health_ins.2. No
+231655                       0                 0                1
+86582                        1                 0                1
+161300                       0                 1                0
+155159                       1                 1                0
+11443                        1                 1                0
+376662                       1                 1                0</code></pre>
+</div>
+</div>
+<p>Como comentado acima, nós temos uma variável dummy para cada categoria. Como tínhamos 2 variáveis qualitativas, então ficamos com 4 variáveis dummies. Porém, para um modelo de regressão, isso não é necessário. Estaríamos inserindo 2 variáveis com colinearidade perfeita no modelo: jobclass=industrial é totalmente correlacionada com jobclass=information, pois o resultado de uma influencia totalmente o da outra (o mesmo vale para as variáveis do plano de saúde). Dessa forma, vamos remover essas variáveis desnecessárias.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>Wage_dummy <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Wage_dummy, <span class="sc">-</span><span class="fu">c</span>(<span class="st">"jobclass.2. Information"</span>,<span class="st">"health_ins.2. No"</span>))</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Wage_dummy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       year age           maritl     race       education             region
+231655 2006  18 1. Never Married 1. White    1. &lt; HS Grad 2. Middle Atlantic
+86582  2004  24 1. Never Married 1. White 4. College Grad 2. Middle Atlantic
+161300 2003  45       2. Married 1. White 3. Some College 2. Middle Atlantic
+155159 2003  43       2. Married 3. Asian 4. College Grad 2. Middle Atlantic
+11443  2005  50      4. Divorced 1. White      2. HS Grad 2. Middle Atlantic
+376662 2008  54       2. Married 1. White 4. College Grad 2. Middle Atlantic
+               health  logwage      wage jobclass.1. Industrial
+231655      1. &lt;=Good 4.318063  75.04315                      1
+86582  2. &gt;=Very Good 4.255273  70.47602                      0
+161300      1. &lt;=Good 4.875061 130.98218                      1
+155159 2. &gt;=Very Good 5.041393 154.68529                      0
+11443       1. &lt;=Good 4.318063  75.04315                      0
+376662 2. &gt;=Very Good 4.845098 127.11574                      0
+       health_ins.1. Yes
+231655                 0
+86582                  0
+161300                 1
+155159                 1
+11443                  1
+376662                 1</code></pre>
+</div>
+</div>
+<p>Uma maneira mais simples de fazer isso, sem precisarmos retirar cada variável “na mão”, é utilizar o argumento “fullRank=T” da função dummyVars().</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>dummies <span class="ot">=</span> <span class="fu">dummyVars</span>(wage<span class="sc">~</span>jobclass<span class="sc">+</span>health_ins, <span class="at">data =</span> Wage, <span class="at">fullRank =</span> T)</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando ao modelo:</span></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>Dummies <span class="ot">=</span> <span class="fu">predict</span>(dummies, <span class="at">newdata =</span> Wage)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note que o comando fullRank=T removeu a primeira variável de cada classificação.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Anexando esse novo objeto aos dados:</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>Wage_dummy <span class="ot">=</span> <span class="fu">cbind</span>(Wage, Dummies)</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Wage_dummy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       year age           maritl     race       education             region
+231655 2006  18 1. Never Married 1. White    1. &lt; HS Grad 2. Middle Atlantic
+86582  2004  24 1. Never Married 1. White 4. College Grad 2. Middle Atlantic
+161300 2003  45       2. Married 1. White 3. Some College 2. Middle Atlantic
+155159 2003  43       2. Married 3. Asian 4. College Grad 2. Middle Atlantic
+11443  2005  50      4. Divorced 1. White      2. HS Grad 2. Middle Atlantic
+376662 2008  54       2. Married 1. White 4. College Grad 2. Middle Atlantic
+             jobclass         health health_ins  logwage      wage
+231655  1. Industrial      1. &lt;=Good      2. No 4.318063  75.04315
+86582  2. Information 2. &gt;=Very Good      2. No 4.255273  70.47602
+161300  1. Industrial      1. &lt;=Good     1. Yes 4.875061 130.98218
+155159 2. Information 2. &gt;=Very Good     1. Yes 5.041393 154.68529
+11443  2. Information      1. &lt;=Good     1. Yes 4.318063  75.04315
+376662 2. Information 2. &gt;=Very Good     1. Yes 4.845098 127.11574
+       jobclass.2. Information health_ins.2. No
+231655                       0                1
+86582                        1                1
+161300                       0                0
+155159                       1                0
+11443                        1                0
+376662                       1                0</code></pre>
+</div>
+</div>
+</section>
+<section id="variância-zero-ou-quase-zero" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="variância-zero-ou-quase-zero"><span class="header-section-number">2.8</span> Variância Zero ou Quase-Zero</h2>
+<p>Algumas vezes em um conjunto de dados podemos ter uma variável que assuma somente um único valor para todos os indivíduos, ou seja, ela possui variância zero. Ou podemos ter uma com uma frequência muito alta de um único valor, possuindo, assim, variância quase zero. Essas variáveis não auxiliam na predição, pois possuem o mesmo valor em muitos indivíduos, trazendo, assim, pouca informação ao modelo. Nosso objetivo é, então, identificar essas variáveis, chamadas de near zero covariates, para que possamos removê-las do nosso modelo de predição.</p>
+<p>Para detectar as near zero covariates, utilizamos a função nearZeroVar() do pacote caret. Vamos verificar se há near zero covariates no banco de dados “forestfires”.</p>
+<p>Na função nearZeroVar() passamos primeiro a base de dados a ser analisada, depois o argumento lógico “saveMetrics”, o qual se for “TRUE” retorna todos os detalhes sobre as variáveis da base de dados afim de identificar as near zero covariates. A saída da função fica da seguinte forma:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>incendio <span class="ot">=</span> <span class="fu">read_csv</span>(<span class="st">"forestfires.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 517 Columns: 13
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (2): month, day
+dbl (11): X, Y, FFMC, DMC, DC, ISI, temp, RH, wind, rain, area
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nearZeroVar</span>(incendio, <span class="at">saveMetrics =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       freqRatio percentUnique zeroVar   nzv
+X       1.058140      1.740812   FALSE FALSE
+Y       1.624000      1.353965   FALSE FALSE
+month   1.069767      2.321083   FALSE FALSE
+day     1.117647      1.353965   FALSE FALSE
+FFMC    1.000000     20.502901   FALSE FALSE
+DMC     1.111111     41.586074   FALSE FALSE
+DC      1.111111     42.359768   FALSE FALSE
+ISI     1.095238     23.017408   FALSE FALSE
+temp    1.000000     37.137331   FALSE FALSE
+RH      1.375000     14.506770   FALSE FALSE
+wind    1.000000      4.061896   FALSE FALSE
+rain  254.500000      1.353965   FALSE  TRUE
+area   82.333333     48.549323   FALSE FALSE</code></pre>
+</div>
+</div>
+<p>Note que é retornado uma tabela onde nas linhas se encontram as variáveis da base de dados e as colunas podemos resumir da seguinte forma:</p>
+<ul>
+<li><p>1ª coluna: a Taxa de Frequência de cada variável. Essa taxa é calculada pela razão de frequências do valor mais comum sobre o segundo valor mais comum.</p></li>
+<li><p>2ª coluna: a Porcentagem de Valores Únicos. Ela é calculada utilizando o número de valores distintos sobre o número de amostras.</p></li>
+<li><p>3ª coluna: indica se a variável tem variância zero.</p></li>
+<li><p>4ª coluna: indica se a variável tem variância quase zero.</p></li>
+</ul>
+<p>Podemos observar que a variável “rain” possui variância quase zero, portanto ela é uma near zero covariate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(incendio<span class="sc">$</span>rain, <span class="at">main =</span> <span class="st">"Histograma da Variável Rain"</span>,</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Variável Rain"</span>, <span class="at">ylab =</span> <span class="st">"Frequência"</span>, <span class="at">col =</span> <span class="st">"purple"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pre-processamento_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Logo, vamos excluir ela da nossa base de dados. O argumento “saveMetrics=FALSE” (default da função) retorna justamente qual(is) variável(is) do bando de dados é(são) near zero covariate .</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>nzv <span class="ot">=</span> <span class="fu">nearZeroVar</span>(incendio)</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>Nova_incendio <span class="ot">=</span> incendio[,<span class="sc">-</span>nzv]</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Nova_incendio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 12
+      X     Y month day    FFMC   DMC    DC   ISI  temp    RH  wind  area
+  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     7     5 mar   fri    86.2  26.2  94.3   5.1   8.2    51   6.7     0
+2     7     4 oct   tue    90.6  35.4 669.    6.7  18      33   0.9     0
+3     7     4 oct   sat    90.6  43.7 687.    6.7  14.6    33   1.3     0
+4     8     6 mar   fri    91.7  33.3  77.5   9     8.3    97   4       0
+5     8     6 mar   sun    89.3  51.3 102.    9.6  11.4    99   1.8     0
+6     8     6 aug   sun    92.3  85.3 488    14.7  22.2    29   5.4     0</code></pre>
+</div>
+</div>
+</section>
+<section id="análise-de-componentes-principais-pca" class="level2" data-number="2.9">
+<h2 data-number="2.9" class="anchored" data-anchor-id="análise-de-componentes-principais-pca"><span class="header-section-number">2.9</span> Análise de Componentes Principais (<em>PCA</em>)</h2>
+<p>Muitas vezes podemos ter variáveis em excesso no nosso banco de dados, o que torna difícil a manipulação das mesmas. A ideia geral do PCA (Principal Components Analysis) é reduzir a quantidade de variáveis, obtendo combinações interpretáveis delas. O PCA faz isso tranformando um conjunto de observações de variáveis possivelmente correlacionadas num conjunto de valores de variáveis linearmente não correlacionadas, chamadas de componentes principais. O número de componentes principais é sempre menor ou igual ao número de variáveis originais, e eles são selecionados de forma que expliquem uma alta porcentagem da variância do modelo.</p>
+<p>Para utilizarmos o PCA no nosso modelo, basta colocar o argumento <span class="red-text">preProcess=“pca”</span> na função train(). Por padrão, são selecionadas componentes que expliquem 95% da variância.</p>
+<p>Vamos aplicar o método “glm”, com a opção “pca”, no banco de dados spam.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(spam)</span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando amostras treino/teste.</span></span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">36</span>)</span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a>noTreino <span class="ot">=</span> <span class="fu">createDataPartition</span>(spam<span class="sc">$</span>type, <span class="at">p=</span><span class="fl">0.75</span>, <span class="at">list=</span>F)</span>
+<span id="cb89-7"><a href="#cb89-7" aria-hidden="true" tabindex="-1"></a>treino <span class="ot">=</span> spam[noTreino,] </span>
+<span id="cb89-8"><a href="#cb89-8" aria-hidden="true" tabindex="-1"></a>teste <span class="ot">=</span> spam[<span class="sc">-</span>noTreino,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Agora vamos treinar o nosso modelo com o PCA.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">887</span>)</span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>modelo <span class="ot">=</span> caret<span class="sc">::</span><span class="fu">train</span>(type <span class="sc">~</span> ., <span class="at">method =</span> <span class="st">"glm"</span>, <span class="at">preProcess =</span> <span class="st">"pca"</span>, <span class="at">data =</span> treino)</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando o modelo na amostra TESTE:</span></span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>testePCA <span class="ot">=</span> <span class="fu">predict</span>(modelo, teste)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Avaliando nosso modelo com a matriz de confusão:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(teste<span class="sc">$</span>type, testePCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction nonspam spam
+   nonspam     653   44
+   spam         56  397
+                                          
+               Accuracy : 0.913           
+                 95% CI : (0.8952, 0.9287)
+    No Information Rate : 0.6165          
+    P-Value [Acc &gt; NIR] : &lt;2e-16          
+                                          
+                  Kappa : 0.817           
+                                          
+ Mcnemar's Test P-Value : 0.2713          
+                                          
+            Sensitivity : 0.9210          
+            Specificity : 0.9002          
+         Pos Pred Value : 0.9369          
+         Neg Pred Value : 0.8764          
+             Prevalence : 0.6165          
+         Detection Rate : 0.5678          
+   Detection Prevalence : 0.6061          
+      Balanced Accuracy : 0.9106          
+                                          
+       'Positive' Class : nonspam         
+                                          </code></pre>
+</div>
+</div>
+<p>O modelo obteve uma acurácia de 0,93, o que pode-se considerar uma alta taxa de acerto.</p>
+<p>É possível alterar a porcentagem de variância a ser explicada pelos componentes nas opções do train().</p>
+<p>Por exemplo, vamos alterar a porcentagem da variância para 60%.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>controle <span class="ot">=</span> <span class="fu">trainControl</span>(<span class="at">preProcOptions =</span> <span class="fu">list</span>(<span class="at">thresh =</span> <span class="fl">0.6</span>))</span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Treinando o modelo 2:</span></span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">754</span>)</span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a>modelo2 <span class="ot">=</span> caret<span class="sc">::</span><span class="fu">train</span>(type <span class="sc">~</span> ., <span class="at">method =</span> <span class="st">"glm"</span>, <span class="at">preProcess =</span> <span class="st">"pca"</span>, <span class="at">data =</span> treino, <span class="at">trControl =</span> controle)</span>
+<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicando o modelo 2:</span></span>
+<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a>testePCA2 <span class="ot">=</span> <span class="fu">predict</span>(modelo2, teste)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Avaliando o segundo modelo pela matriz de confusão:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(teste<span class="sc">$</span>type,testePCA2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction nonspam spam
+   nonspam     647   50
+   spam         71  382
+                                          
+               Accuracy : 0.8948          
+                 95% CI : (0.8756, 0.9119)
+    No Information Rate : 0.6243          
+    P-Value [Acc &gt; NIR] : &lt; 2e-16         
+                                          
+                  Kappa : 0.7778          
+                                          
+ Mcnemar's Test P-Value : 0.06904         
+                                          
+            Sensitivity : 0.9011          
+            Specificity : 0.8843          
+         Pos Pred Value : 0.9283          
+         Neg Pred Value : 0.8433          
+             Prevalence : 0.6243          
+         Detection Rate : 0.5626          
+   Detection Prevalence : 0.6061          
+      Balanced Accuracy : 0.8927          
+                                          
+       'Positive' Class : nonspam         
+                                          </code></pre>
+</div>
+</div>
+<p>Obtemos uma acurácia de 0,92, o que indica também uma alta taxa de acerto, porém um pouco menor que a do modelo anterior. Note que a sensitividade e a especificidade também diminuíram.</p>
+<p>Em geral, são utilizados pontos de corte para a variãncia explicada acima de 0,9.</p>
+</section>
+<section id="pca-fora-da-função-train" class="level2" data-number="2.10">
+<h2 data-number="2.10" class="anchored" data-anchor-id="pca-fora-da-função-train"><span class="header-section-number">2.10</span> <em>PCA</em> fora da função train()</h2>
+<p>Podemos também realizar o pré-processamento fora da função train(). Primeiramente vamos criar o pré-processamento, utilizando a amostra treino.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">=</span> <span class="fu">preProcess</span>(treino, <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"center"</span>,<span class="st">"scale"</span>,<span class="st">"pca"</span>), <span class="at">thresh =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Obs:</strong> pode-se fixar o número de componentes, utilizando o argumento “pcaComp” ao invés de “thresh”.</p>
+<p>Agora aplicamos o pré-processamento na amostra treino e realizamos o treinamento, utilizando a amostra treino já pré-processada.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>treinoPCA <span class="ot">=</span> <span class="fu">predict</span>(PCA, treino)</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>modelo <span class="ot">=</span> caret<span class="sc">::</span><span class="fu">train</span>(type <span class="sc">~</span> ., <span class="at">data =</span> treinoPCA, <span class="at">method=</span><span class="st">"glm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Aplicando o pré-processamento na amostra teste:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>testePCA <span class="ot">=</span> <span class="fu">predict</span>(PCA, teste)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Por último, aplicamos o modelo criado com a amostra treino na amostra teste pré-processada.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>testeMod <span class="ot">=</span> <span class="fu">predict</span>(modelo, testePCA)</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Avaliando o modelo:</span></span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(testePCA<span class="sc">$</span>type, testeMod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction nonspam spam
+   nonspam     653   44
+   spam         56  397
+                                          
+               Accuracy : 0.913           
+                 95% CI : (0.8952, 0.9287)
+    No Information Rate : 0.6165          
+    P-Value [Acc &gt; NIR] : &lt;2e-16          
+                                          
+                  Kappa : 0.817           
+                                          
+ Mcnemar's Test P-Value : 0.2713          
+                                          
+            Sensitivity : 0.9210          
+            Specificity : 0.9002          
+         Pos Pred Value : 0.9369          
+         Neg Pred Value : 0.8764          
+             Prevalence : 0.6165          
+         Detection Rate : 0.5678          
+   Detection Prevalence : 0.6061          
+      Balanced Accuracy : 0.9106          
+                                          
+       'Positive' Class : nonspam         
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="normalização-dos-dados" class="level2" data-number="2.11">
+<h2 data-number="2.11" class="anchored" data-anchor-id="normalização-dos-dados"><span class="header-section-number">2.11</span> Normalização dos Dados</h2>
+<section id="transformação-de-box-cox" class="level3" data-number="2.11.1">
+<h3 data-number="2.11.1" class="anchored" data-anchor-id="transformação-de-box-cox"><span class="header-section-number">2.11.1</span> Transformação de Box-Cox</h3>
+<p>A transformação de Box-Cox é uma transformação feita nos dados (contínuos) para tentar normalizá-los. Considerando <span class="math inline">\(X_1, X_2, ..., X_n\)</span> as variáveis do conjunto de dados original, essa transformação consiste em encontrar um <span class="math inline">\(\lambda\)</span> tal que as variáveis transformadas <span class="math inline">\(Y_1, Y_2, ..., Y_n\)</span> se aproximem de uma distribuição normal com variância constante.</p>
+<p>Essa transformação é dada pela seguinte forma: <span class="math inline">\(Y_i = \frac{X_i^\lambda-1}{\lambda}\)</span>, se <span class="math inline">\(\lambda \neq 0\)</span>. O parâmetro <span class="math inline">\(\lambda\)</span> é estimado utilizando o método de máxima verossimilhança.</p>
+<p>O método de Box-Cox é o método mais simples e o mais eficiente computacionalmente. Podemos aplicar a transformação de Box-Cox nos dados através da função preProcess().</p>
+<p><strong>Obs:</strong> a transformação de Box-Cox só pode ser utilizada com dados positivos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>treinoBC <span class="ot">=</span> <span class="fu">preProcess</span>(treino, <span class="at">method =</span> <span class="st">"BoxCox"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="outras-transformações" class="level3" data-number="2.11.2">
+<h3 data-number="2.11.2" class="anchored" data-anchor-id="outras-transformações"><span class="header-section-number">2.11.2</span> Outras Transformações</h3>
+<section id="transformação-de-yeo-johnson" class="level4" data-number="2.11.2.1">
+<h4 data-number="2.11.2.1" class="anchored" data-anchor-id="transformação-de-yeo-johnson"><span class="header-section-number">2.11.2.1</span> Transformação de Yeo-Johnson</h4>
+<p>A transformação de Yeo-Johnson é semelhante à transformação de Box-Cox, porém ela aceita preditores com dados nulos e/ou dados negativos. Também podemos aplicá-la aos dados através da função preProcess().</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>treinoYJ <span class="ot">=</span> <span class="fu">preProcess</span>(treino, <span class="at">method =</span> <span class="st">"YeoJohnson"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="transformação-exponencial-de-manly" class="level4" data-number="2.11.2.2">
+<h4 data-number="2.11.2.2" class="anchored" data-anchor-id="transformação-exponencial-de-manly"><span class="header-section-number">2.11.2.2</span> Transformação Exponencial de Manly</h4>
+<p>O método exponencial de Manly também consiste em estimar um <span class="math inline">\(\lambda\)</span> tal que as variáveis transformadas se aproximem de uma distribuição normal. Assim como a transformação de Yeo-Johnson, ela também aceita dados positivos, nulos e negativos. Essa transformação é dada pela seguinte forma:</p>
+<p><span class="math inline">\(Y_i = \frac{e^{X\lambda}-1}{\lambda}\)</span>, se $}.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>treinoEXP <span class="ot">=</span> <span class="fu">preProcess</span>(treino, <span class="at">method =</span> <span class="st">"expoTrans"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./comp-func.html" class="pagination-link" aria-label="Comparando Funções Preditoras">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Comparando Funções Preditoras</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./metodos-de-treino-baseados-em-arvore.html" class="pagination-link" aria-label="Métodos de Treino Baseados em Árvore">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Métodos de Treino Baseados em Árvore</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Criação: Maqueise Pinheiro e Thaís Machado. <br> Orientação: Douglas Rodrigues (UFF) e Karina Yaginuma (UFF). <br> Colaboradores: Gabriel Miranda, Thiago Augusto, Luana Moreno e Guilherme Ceacero.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/CienciaDeDadosUFF/cienciadedadosuff2.github.io/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
