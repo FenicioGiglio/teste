@@ -603,36 +603,30 @@ O método KNN assume que há similaridade em observações próximas do conjunto
 
 Outros pontos que são importantes ser citados são:
 
-1. O KNN é mais adequado para dados de baixa dimensão (poucas variáveis), e
+1.  O KNN é mais adequado para dados de baixa dimensão (poucas variáveis), e
 
-2. O KNN é considerado um algoritmo “preguiçoso” (lento).
+2.  O KNN é considerado um algoritmo “preguiçoso” (lento).
 
 Vamos entender o passo a passo de como o método funciona a seguir. Considere que a amostra abaixo seja nossa amostra treino.
-
-
 
 ```{r}
 treino = readxl::read_excel("heart_treino.xlsx")
 treino
 ```
 
-
 Queremos predizer se uma pessoa possui uma doença cardíaca (variável “AHD”) baseado nas seguintes variáveis:
 
-- RestBP: pressão arterial, medida em milímetros de mercúrio (mmHg);
-- Chol: colesterol sérico, medido em miligramas por decilitro (mg/dl).
+-   RestBP: pressão arterial, medida em milímetros de mercúrio (mmHg);
+-   Chol: colesterol sérico, medido em miligramas por decilitro (mg/dl).
 
 Como não precisamos treinar o modelo, vamos carregar a amostra teste para aplicá-lo.
-
 
 ```{r}
 teste = readxl::read_excel("heart_teste.xlsx")
 teste
 ```
 
-
 Como a amostra teste serve para simular uma nova amostra, precisamos utilizá-la sem os rótulos na variável a ser predita. Assim, vamos criar uma nova amostra teste não rotulada.
-
 
 ```{r}
 teste_predicao = teste
@@ -655,46 +649,33 @@ ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) + th
 
 ```
 
-
 O primeiro passo é escolher um valor para o k. Como a predição será feita com base na moda das k classificações mais próximas da amostra, é recomendado escolher um k ímpar, para evitar algum possível empate. Vamos utilizar k = 3.
 
 OBS: o melhor valor para k pode ser encontrado por cross validation.
 
 Para verificar quais são os 3 vizinhos mais próximos das observações precisamos calcular as distâncias entre elas e todas as observações do conjunto de dados e pegar as 3 menores. Existem vários métodos de se calcular a distância entre dois pontos, mas a mais usual é a distância euclidiana.
 
-
 #### Distância Euclidiana:
-
 
 Sejam $p = (p_1, p_2, ..., p_n)$ e $q = (q_1, q_2, ..., q_n)$ dois pontos de dimensão n. A distância euclidiana entre p e q é definida como: $d(p, q) = \sqrt{\sum_{i=1}^n(p_i - q_i)^2}$.
 
-
 Vamos, primeiramente, calcular a distância euclidiana entra a observação 8 (a primeira do conjunto teste) e todas as demais observações.
 
+-   Distância entre as observações 8 e 1: $\sqrt{(120 - 145)^2 + (229-233)^2} = 25.318$;
 
-- Distância entre as observações 8 e 1: $\sqrt{(120 - 145)^2 + (229-233)^2} = 25.318$;
+-   Distância entre as observações 8 e 2: $\sqrt{(120 - 160)^2 + (229-286)^2} = 69.635$;
 
+-   Distância entre as observações 8 e 3: $\sqrt{(120 - 130)^2 + (229-250)^2} = 23.259$;
 
-- Distância entre as observações 8 e 2: $\sqrt{(120 - 160)^2 + (229-286)^2} = 69.635$;
+-   Distância entre as observações 8 e 4: $\sqrt{(120 - 120)^2 + (229-236)^2} = 7.000$;
 
+-   Distância entre as observações 8 e 5: $\sqrt{(120 - 120)^2 + (229-354)^2} = 125.000$;
 
-- Distância entre as observações 8 e 3: $\sqrt{(120 - 130)^2 + (229-250)^2} = 23.259$;
+-   Distância entre as observações 8 e 6: $\sqrt{(120 - 130)^2 + (229-254)^2} = 26.926$;
 
-
-- Distância entre as observações 8 e 4: $\sqrt{(120 - 120)^2 + (229-236)^2} = 7.000$;
-
-
-- Distância entre as observações 8 e 5: $\sqrt{(120 - 120)^2 + (229-354)^2} = 125.000$;
-
-
-- Distância entre as observações 8 e 6: $\sqrt{(120 - 130)^2 + (229-254)^2} = 26.926$;
-
-
-- Distância entre as observações 8 e 7: $\sqrt{(120 - 140)^2 + (229-203)^2} = 32.802$;
-
+-   Distância entre as observações 8 e 7: $\sqrt{(120 - 140)^2 + (229-203)^2} = 32.802$;
 
 Podemos ver que as observações mais próximas da observação 8 são as observações 4, 3 e 1, respectivamente.
-
 
 ```{r}
 ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) +
@@ -708,11 +689,7 @@ ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) +
                         labels = c("Não", "Sim", "Desconhecido"))
 ```
 
-
-
 Logo, como as 3 observações são classificadas como “Não” para a variável de interesse, imputamos essa classificação à observação que queremos prever.
-
-
 
 ```{r}
 # Convertendo a coluna com as predições para character para poder acrescentar a predição:
@@ -723,32 +700,21 @@ teste_predicao[1,3] = "No"
 teste_predicao
 ```
 
-
 Agora vamos realizar o mesmo procedimento para a observação 9:
 
+-   Distância entre as observações 9 e 1: $\sqrt{(130 - 145)^2 + (204-233)^2} = 32.650$;
 
+-   Distância entre as observações 9 e 2: $\sqrt{(130 - 160)^2 + (204-286)^2} = 87.316$;
 
-- Distância entre as observações 9 e 1: $\sqrt{(130 - 145)^2 + (204-233)^2} = 32.650$;
+-   Distância entre as observações 9 e 3: $\sqrt{(130 - 130)^2 + (204-250)^2} = 46.000$;
 
+-   Distância entre as observações 9 e 4: $\sqrt{(130 - 120)^2 + (204-236)^2} = 33.526$;
 
-- Distância entre as observações 9 e 2: $\sqrt{(130 - 160)^2 + (204-286)^2} = 87.316$;
+-   Distância entre as observações 9 e 5: $\sqrt{(130 - 120)^2 + (204-354)^2} = 150.333$;
 
+-   Distância entre as observações 9 e 6: $\sqrt{(130 - 130)^2 + (204-254)^2} = 50.000$;
 
-- Distância entre as observações 9 e 3: $\sqrt{(130 - 130)^2 + (204-250)^2} = 46.000$;
-
-
-- Distância entre as observações 9 e 4: $\sqrt{(130 - 120)^2 + (204-236)^2} = 33.526$;
-
-
-- Distância entre as observações 9 e 5: $\sqrt{(130 - 120)^2 + (204-354)^2} = 150.333$;
-
-
-- Distância entre as observações 9 e 6: $\sqrt{(130 - 130)^2 + (204-254)^2} = 50.000$;
-
-
-- Distância entre as observações 9 e 7: $\sqrt{(130 - 140)^2 + (204-203)^2} = 10.050$;
-
-
+-   Distância entre as observações 9 e 7: $\sqrt{(130 - 140)^2 + (204-203)^2} = 10.050$;
 
 ```{r}
 ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) +
@@ -762,10 +728,7 @@ ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) +
                         labels = c("Não", "Sim", "Desconhecido"))
 ```
 
-
-
 Como 2 das 3 observações são classificadas como “Não”, a observação 9 recebe a classificação “Não”.
-
 
 ```{r}
 # A observação 9 na "base" é a observação 2 no "teste_predicao".
@@ -773,9 +736,7 @@ teste_predicao[2,3] = "No"
 teste_predicao
 ```
 
-
 Por último, vamos classificar a observação 10.
-
 
 ```{r}
 ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) +
@@ -789,9 +750,7 @@ ggplot(base, aes(x = RestBP, y = Chol, color = AHD)) + geom_point(size = 3) +
                         labels = c("Não", "Sim", "Desconhecido"))
 ```
 
-
 Então a observação recebe a classificação “Sim”, visto que 2 das 3 observações mais próximas à ela são classificadas como “Sim”.
-
 
 ```{r}
 # A observação 10 na "base" é a observação 3 no "teste_predicao".
@@ -799,23 +758,15 @@ teste_predicao[3,3] = "Yes"
 teste_predicao
 ```
 
-
 E assim terminamos as nossas predições. Vamos construir a matriz de confusão para ver o quanto acertamos:
-
 
 table(teste_predicao$AHD, teste$AHD)
 
-
-
 O algoritmo acertou 2 das 3 classificações da amostra teste, o que nos dá uma precisão de 66,67%, uma sensibilidade de 50% e uma especificidade de 100%. Como identificar os pacientes que possuem uma doença cardíaca é mais importante do que identificar os que não possuem, devemos dar mais peso à sensibilidade do nosso modelo do que à especificidade. Ou seja, o modelo não se saiu tão bem quanto o esperado, mas isso se deve principalmente ao fato de termos utilizado uma amostra muito pequena. Se obtivéssemos essas medidas num problema real (com bases grandes), esse modelo não seria o mais adequado. Outro fator que deve ser levado em conta também é a escolha do valor de k, que não deve ser feita de forma aleatória e sim de forma a otimizar o modelo.
-
-
 
 ### Em Regressão
 
-
 Para esse exemplo, vamos utilizar a base de dados faithful do pacote básico do R. Queremos prever o tempo de espera (waiting) entre uma erupção e outra de um geiser dado o tempo de erupção (*eruption*).
-
 
 ```{r}
 data("faithful")
@@ -829,11 +780,7 @@ ggplot(treino, aes(x=eruptions, y=waiting)) +
   geom_point() + theme_minimal()
 ```
 
-
-
 Suponha que obtivemos uma nova observação cujo tempo de erupção foi de $3.2$, indicado pela linha vermelha.
-
-
 
 ```{r}
 ggplot(treino, aes(x=eruptions, y=waiting)) +
@@ -841,9 +788,7 @@ ggplot(treino, aes(x=eruptions, y=waiting)) +
   geom_vline(xintercept= 3.2, colour="red") 
 ```
 
-
 Assim como em classificação, a ideia do KNN é estimar o valor pela média das sobservações menos distantes. Essa distância pode ser obtida pela método Euclidiano, de Manhattan ou ainda outro. O mais comum é o Euclidiano $d(p, q) = \sqrt{\sum_{i=1}^n(p_i - q_i)^2}$ que é o que usaremos.
-
 
 ```{r}
 # calculando a distancia euclidiana
@@ -853,14 +798,11 @@ treino= mutate(treino,
 head(arrange(treino, distancia), n=1)
 ```
 
-
 O vizinho mais próximo de $3.2$ é $3.317$. Então, usando um k=1, temos que o tempo estimado de espera (waiting) para essa nova observação é a média dos valores vizinhos. Nesse caso, $83$ indicado pelo ponto vermelho.
-
 
 ```{r}
 (media = mean(head(arrange(treino, distancia), n=1)$waiting))
 ```
-
 
 ```{r}
 # k = 1
@@ -873,19 +815,15 @@ ggplot(treino, aes(x=eruptions, y=waiting)) +
            size = .5, alpha=0.5) 
 ```
 
-
 Poderiamos usar um k=10, nesse caso, teriamos
-
 
 ```{r}
 head(arrange(treino, distancia), n=10)
 ```
 
-
 ```{r}
 (media = mean(head(arrange(treino, distancia), n=10)$waiting))
 ```
-
 
 ```{r}
 # k = 10
@@ -898,21 +836,16 @@ ggplot(treino, aes(x=eruptions, y=waiting)) +
            size = .5, alpha=0.5) + theme_minimal()
 ```
 
-
-
 Ou ainda, um k=190
-
 
 ```{r}
 # mostrando as ultimas observações ordenadas pela distancia
 tail(arrange(treino, distancia), n=5)
 ```
 
-
 ```{r}
 (media = mean(head(arrange(treino, distancia), n=190)$waiting))
 ```
-
 
 ```{r}
 # k = 190
@@ -925,39 +858,27 @@ ggplot(treino, aes(x=eruptions, y=waiting)) +
            size = .5, alpha=0.5) 
 ```
 
-
 Para bases com mais de uma variável explicativa, o cálculo da distância é feito da mesma forma assim como foi mostrado na parte de classificação.
-
-
 
 ### KNN com o pacote FNN
 
-
 Agora veremos como utilizar algumas funções do pacote FNN (*Fast Nearest Neighbor*) para aplicarmos o KNN em um problema de classificação e de regressão. Iremos utilizar bases de dados reais obtidas no repositório de aprendizado de máquina https://archive.ics.uci.edu/ml/index.php.
-
 
 #### Em Classificação
 
-
 Vamos carregar a base de dados transfusion. Essa base contém algumas informações sobre doação de sangue de 748 voluntários. Nossa variável de interesse é a variável “whether.he.she.donated.blood.in.March.2007”, que indica se o paciente doou sangue em março de 2007 ou não (1 - doou, 0 - não doou). As variáveis explicativas são as seguintes:
 
-- Recency..months. - meses desde a última doação de sangue;
-- Frequency..times. - número total de doações já realizadas;
-- Monetary..c.c..blood. - sangue total já doado em c.c. (centímetros cúbicos);
-- Time..months - meses desde a 1ª doação de sangue.
-
+-   Recency..months. - meses desde a última doação de sangue;
+-   Frequency..times. - número total de doações já realizadas;
+-   Monetary..c.c..blood. - sangue total já doado em c.c. (centímetros cúbicos);
+-   Time..months - meses desde a 1ª doação de sangue.
 
 ```{r}
 base = readRDS("transfusion.rds")
 str(base)
 ```
 
-
-
 É importante ressaltar que para aplicação do KNN todas as variáveis explicativas devem ser numéricas. Como isso ocorre na nossa base, vamos prosseguir para a divisão em treino e teste.
-
-
-
 
 ```{r}
 # Pegando 80% dos dados para o treino:
@@ -968,12 +889,9 @@ treino = base[noTreino,]
 teste = base[-noTreino,]
 ```
 
-
-
 Como temos que escolher o melhor valor de k para o modelo, não podemos escolhê-lo de forma arbitrária. Sendo assim, vamos pegar uma parte do nosso conjunto de treino e utilizarmos para validação. A validação, como já comentado no capítulo Design de Predição, serve como um “pré-teste”, onde iremos utilizar vários valores diferentes de k nela, e selecionar aquele que otimiza a predição. Esse será o valor utilizado para a amostra teste.
 
 Vamos pegar 20% dos dados para a validação. Dessa forma, temos que pegar 25% da amostra treino, pois ela é 80% dos dados totais ($0.25 \times 0.8 = 0.2$)
-
 
 ```{r}
 set.seed(100)
@@ -983,9 +901,7 @@ Treino = treino[treino_indices,]
 validacao = treino[-treino_indices,]
 ```
 
-
 Além disso, temos que separar a variável de interesse das variáveis explicativas.
-
 
 ```{r}
 library(dplyr)
@@ -1003,18 +919,14 @@ teste_label = teste$whether.he.she.donated.blood.in.March.2007
 teste = teste %>% select(-whether.he.she.donated.blood.in.March.2007)
 ```
 
-
-
 Agora vamos utilizar a função knn() do pacote FNN para predizermos os valores da validação a partir dos valores ímpares de k no intervalo de 1 a 19. É importante ressaltar que essa função só pode ser utilizada para problemas de classificação. Os principais argumentos dessa função são:
 
-- train - conjunto treino sem os rótulos;
-- test - conjunto de teste sem os rótulos;
-- cl - rótulos do conjunto treino;
-- k - valor de k (vizinhos) a serem utilizados.
+-   train - conjunto treino sem os rótulos;
+-   test - conjunto de teste sem os rótulos;
+-   cl - rótulos do conjunto treino;
+-   k - valor de k (vizinhos) a serem utilizados.
 
 OBS: caso utilize algum valor par de k na função e houver um empate na classificação de alguma amostra, sua classificação final é decidida de forma aleatória.
-
-
 
 ```{r}
 # Lista que conterá as matrizes de confusão e medidas de avaliação para cada k utilizado:
@@ -1030,12 +942,9 @@ repeat{
 matrizes
 ```
 
-
-
 Note que os modelos que possuem as maiores precisões são os com k = 3 e k = 7, de 0,7248. Porém, como no nosso problema identificar quem doou sangue é mais importante do que identificar aqueles que não doaram, vamos escolher o com maior sensibilidade. Sendo assim, o melhor k é o k = 1, que obteve uma sensibilidade de 0,25.
 
 O KNN com k = 1 é conhecido como The Nearest Neighbor Algorithm.
-
 
 ```{r}
 # Utilizando k = 1 para o conjunto teste:
@@ -1045,13 +954,9 @@ modelo_final = FNN::knn(train = Treino, test = teste, cl = Treino_label, k = 1)
 caret::confusionMatrix(modelo_final, as.factor(teste_label), positive = "1")
 ```
 
-
-
-
 Repare que as medidas de avaliação do modelo não foram tão boas; o valor da precisão, particularmente, foi menor do que a taxa de não informação (No Information Rate), o que não deve acontecer. Sendo assim, esse não é o modelo ideal para essa base.
 
 Vamos realizar o mesmo procedimento para os dados mas dessa vez vamos padronizá-los antes.
-
 
 ```{r}
 # Criando a padronização com a função preProcess() do pacote caret:
@@ -1064,9 +969,7 @@ nova_valid = predict(padronizacao, validacao)
 novo_teste = predict(padronizacao, teste)
 ```
 
-
 Agora vamos verificar qual é o melhor k:
-
 
 ```{r}
 matrizes = list()
@@ -1081,13 +984,9 @@ repeat{
 matrizes
 ```
 
-
-
 Para o KNN é extremamente importante padronizarmos os dados antes, pois as medidas das variáveis geralmente estão em escalas diferentes, o que torna as distâncias entre os pontos distorcidas dos seus reais valores.
 
 Podemos notar que, em geral, os modelos melhoraram nas sensibilidades e nas precisões. Vamos utilizar k = 17, que foi o modelo com maior sensibilidade (0,2708) e precisão (0,7383).
-
-
 
 ```{r}
 # Utilizando k = 17 para o conjunto teste:
@@ -1097,34 +996,25 @@ modelo_final = FNN::knn(novo_treino, novo_teste, Treino_label, k = 17)
 caret::confusionMatrix(modelo_final, as.factor(teste_label), positive = "1")
 ```
 
-
-
 Repare que a precisão melhorou muito (0,8188) e a sensibilidade foi um pouco maior, de 0,3636. Isso significa que 36,36% dos voluntários que doaram sangue em março de 2007 foram identificados.
-
 
 #### Em Regressão
 
-
 Vamos carregar a base de dados Computer_Hardware. Essa base contém algumas informações sobre hardwares de diferentes computadores, entre elas nossa variável de interesse, “PRP”, que representa o desempenho relativo publicado do computador. As demais variáveis são:
 
-
-- MYCT: tempo de ciclo da máquina em nanossegundos;
-- MMIN: memória principal mínima em kilobytes;
-- MMAX: memória principal máxima em kilobytes;
-- CACH: memória do cachê em kilobytes;
-- CHMIN: canais mínimos em unidades;
-- CHMAX: canais máximos em unidades.
-
+-   MYCT: tempo de ciclo da máquina em nanossegundos;
+-   MMIN: memória principal mínima em kilobytes;
+-   MMAX: memória principal máxima em kilobytes;
+-   CACH: memória do cachê em kilobytes;
+-   CHMIN: canais mínimos em unidades;
+-   CHMAX: canais máximos em unidades.
 
 ```{r}
 pc = readRDS("Computer_Hardware.rds")
 str(pc)
 ```
 
-
 Novamente temos todas as variáveis numéricas, então vamos prosseguir para a divisão em treino, validação e teste. Vamos separar 60% dos dados para treino, 20% para validação e 20% para teste.
-
-
 
 ```{r}
 set.seed(100)
@@ -1139,10 +1029,7 @@ Treino = treino[treino_indices,]
 validacao = treino[-treino_indices,]
 ```
 
-
-
 Além disso, devemos separar os rótulos de cada conjunto e as suas variáveis explicativas.
-
 
 ```{r}
 library(dplyr)
@@ -1160,11 +1047,7 @@ teste_label = teste$PRP
 teste = teste %>% select(-PRP)
 ```
 
-
-
 Como já comentado anteriormente, é extremamente importante padronizarmos os dados antes de aplicar o KNN, pois as variáveis se encontram em medidas diferentes e isso pode afetar drasticamente as predições do modelo.
-
-
 
 ```{r}
 # Para padronizarmos utilizamos a função preProcess() do pacote caret:
@@ -1177,18 +1060,14 @@ nova_valid = predict(padronizacao, validacao)
 novo_teste = predict(padronizacao, teste)
 ```
 
-
-
 Como vamos aplicar o KNN para regressão, precisamos utilizar a função knn.reg() do pacote FNN. Essa função deve ser usada apenas para aplicar o KNN em modelos de regressão. Seus principais argumentos são:
 
-- train: conjunto treino sem os rótulos;
-- test: conjunto teste sem os rótulos;
-- y: rótulos do conjunto treino;
-- k: valor de k (vizinhos) a serem utilizados.
+-   train: conjunto treino sem os rótulos;
+-   test: conjunto teste sem os rótulos;
+-   y: rótulos do conjunto treino;
+-   k: valor de k (vizinhos) a serem utilizados.
 
 Para avaliação do modelo iremos utilizar a função defaultSummary() do pacote caret, que nos retornará os valores de RMSE, $R^2$ e MAE dos modelos. Como a base de dados é menor do que a utilizada para o problema de classificação, vamos utilizar os valores de k apenas até o valor 10. Como as saídas são numéricas, os valores pares de k também estão inclusos no intervalo.
-
-
 
 ```{r}
 # Lista que conterá as medidas avaliativas de cada modelo:
@@ -1201,10 +1080,7 @@ for(i in 1:10){
 modelos
 ```
 
-
 Podemos notar que o modelo que utiliza k = 2 obteve o menor RMSE e o maior $R^2$ dentre os modelos. O menor MAE ficou por conta do k = 10. Sendo assim, o modelo com k = 2 demonstrou ser o melhor para os dados. Então esse é o valor de k que iremos utilizar para a amostra teste.
-
-
 
 ```{r}
 # Aplicando o KNN com k = 2 no conjunto teste:
@@ -1213,23 +1089,17 @@ modelo_final = FNN::knn.reg(train = novo_treino, test = novo_teste, y = Treino_l
 modelo_final
 ```
 
-
-Agora vamos avaliar o nosso modelo final. Para pegar apenas o vetor com as predições precisamos utilizar o comando “modelo_final$pred”.
-
+Agora vamos avaliar o nosso modelo final. Para pegar apenas o vetor com as predições precisamos utilizar o comando “modelo_final\$pred”.
 
 ```{r}
 caret::defaultSummary(data.frame(obs = teste_label, pred = modelo_final$pred))
 ```
 
-
 Note que obtivemos um $R^2$ acima de 0,9 e o valor do MAE foi um pouco menor do que o do modelo aplicado na validação. O RMSE sofreu um leve aumento, mas como melhoramos 2 das 3 medidas do modelo, pode-se dizer que ele se saiu bem para os dados.
-
 
 #### KNN com a função train() do pacote caret
 
-
 Vamos usar a base de dados Sacramento do pacote caret. Ela contém informações sobre imóveis à venda em Sacramento, Califórnia. Queremos predizer o preço (price) do imóvel baseado no número de quartos (beds), banheiros (baths), tamanho (sqft) e localização (latitude e longitude).
-
 
 ```{r}
 library(caret); library(dplyr)
@@ -1245,23 +1115,17 @@ teste = Sacramento[-noTreino,]
 head(treino)
 ```
 
-
 Note que a variância das variáveis são bem diferentes. Por exemplo, a variância de beds é 0.7873567 enquanto que a variância de sqft é 527601.7995051. Suponha que temos uma nova observação e vamos começar a calcular as distâncias. Seja a nova observação:
 
-
 Então, calculando a distância euclidiana entre ela e a primeira observação do conjunto treino temos:
-
 
 $\sqrt{(3-1)^2 + (1-1)^2 + (1167 - 836)^2 + (38.47 - 38.63)^2 + (-121.43 - (-121.43))^2} = ...$
 
 Perceba que a influência que a variavel sqft terá sob a distância é muito maior do que a da variavel beds ou longitude por exemplo. Isso pode ser resolvido ao padronizar os dados.
 
-
 Ao utilizar o método KNN, os dados precisam ser padronizados por causa da influência no cálculo das distâncias.
 
 Sabendo disso, podemos agora treinar nosso modelo.
-
-
 
 ```{r}
 library(caret)
@@ -1272,45 +1136,18 @@ modelo = caret::train(price ~ ., data = treino, method = "knn", tuneLength = 10,
 modelo
 ```
 
-
-
 Usando a função train() podemos indicar o valor de k utilizando o argumento tuneLength, onde dizemos uma quantidade n, ele constroi o modelos utilizando os n primeiros valores default e retorna o melhor k baseado na precisão (se for um problema de classificação) ou RMSE (se for um problema de regressão). Também podemos utilizar o tuneGrid = expand.grid(k=) passando um ou mais valores para k e ele testa todos e decide qual é o melhor com o mesmo critério do tuneLenght.
 
 Podemos alterar o critério de escolha do k adicionando o argumento metric="MAE" no train() por exemplo.
-
 
 ```{r}
 plot(modelo)
 ```
 
-
-
 Como podemos ver, k=5 obteve a menor raiz do erro quadrático médio, portanto foi o k escolhido.
-
 
 ```{r}
 # Avaliando o preditor
 predicao = predict(modelo, teste)
 postResample(predicao,teste$price)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

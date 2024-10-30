@@ -1,4 +1,4 @@
-# Introdução {.unnumbered}
+# Introdução
 
 ## O que é o Aprendizado de Máquina?
 
