@@ -27,11 +27,10 @@ book:
     - caret.qmd
     - cross-valid.qmd
     - comp-func.qmd
-    #    - teste-link.qmd
     - pre-processamento.qmd
     - metodos-de-treino-baseados-em-arvore.qmd
     - outros-metodos.qmd
-     #   - references.qmd
+    - referencias.qmd
 
 
 
