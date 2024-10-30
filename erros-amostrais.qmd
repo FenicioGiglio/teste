@@ -1,4 +1,4 @@
-# Erros Amostrais {.unnumbered}
+# Erros Amostrais
 
 Este é um dos conceitos mais fundamentais com os quais lidamos na aprendizagem de máquina e previsão. Temos duas taxas de erros amostrais: o **erro dentro da amostra (*in sample error*)** e o **erro fora da amostra (*out of sample error*)**.
 

@@ -1,4 +1,4 @@
-# Predição {.unnumbered}
+# Predição
 
 Queremos então construir um algoritmo "preditor" capaz de inferir se um dado pertence ou não a uma certa categoria. O preditor será formado dos seguintes componentes:
 

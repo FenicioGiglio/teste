@@ -1,4 +1,4 @@
-# Tipos de Aprendizado de Máquina {.unnumbered}
+# Tipos de Aprendizado de Máquina
 
 ## **Aprendizado não supervisionado**
 

@@ -1,4 +1,4 @@
-# Design de predição {.unnumbered}
+# Design de predição
 
 **1. Defina sua taxa de erro (*benchmark*).**
 

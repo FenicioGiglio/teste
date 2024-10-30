@@ -1,4 +1,4 @@
-# Avaliando Preditores - Introdução ao Pacote Caret {.unnumbered}
+# Avaliando Preditores - Introdução ao Pacote Caret
 
 O pacote caret (abreviação de *Classification And Regression Training*) é um pacote muito útil para o *machine learning* pois envolve algoritmos que possibilitam que as previsões sejam feitas de forma mais prática, simplificando o processo de criação de modelos preditivos. Neste [guia detalhado](http://topepo.github.io/caret/index.html) pode ser encontrado mais informações sobre o pacote.
 

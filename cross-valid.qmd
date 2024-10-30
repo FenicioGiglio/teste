@@ -1,4 +1,4 @@
-## Cross Validation (Validação Cruzada) {.unnumbered}
+## Cross Validation (Validação Cruzada)
 
 Existem diversos métodos de aprendizado de máquina que podemos usar para construir um preditor. Então como saber qual método é melhor? Um jeito de fazer isso é usando a validação cruzada.
 
