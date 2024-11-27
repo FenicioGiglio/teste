@@ -1,0 +1,28 @@
+github: [metadata]
+
+url: "https://cienciadedadosuff.github.io"
+
+title: Ciência de dados - UFF
+
+email: your-email@example.com
+description:
+
+twitter_username: CienciaDeDadosUFF
+github_username:  CienciaDeDadosUFF
+
+permalink: /cursos/notebooks/:title:output_ext
+
+collections:
+  python:
+    output: true
+    permalink: /:collection/:title:output_ext
+
+sass:
+  sass_dir: assets/css
+  
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-paginate
+  - jekyll-redirect-from
+  - jekyll-seo-tag
